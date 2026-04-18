@@ -132,7 +132,7 @@ public class RoomService {
                 .collect(Collectors.toList());
     }
 
-    private RoomDTO mapToDTO(Room room) {
+    public RoomDTO mapToDTO(Room room) {
         return RoomDTO.builder()
                 .id(room.getId())
                 .roomNumber(room.getRoomNumber())

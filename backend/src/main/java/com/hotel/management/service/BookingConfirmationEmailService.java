@@ -52,6 +52,15 @@ public class BookingConfirmationEmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(buildPlainTextBody(booking), buildHtmlBody(booking));
+
+            // Attach cover image as inline (cid:coverImage)
+            java.io.File coverFile = new java.io.File("frontend/img/cover.jpg");
+            if (coverFile.exists()) {
+                helper.addInline("coverImage", coverFile);
+            } else {
+                logger.warn("Cover image not found at {}. Email will be sent without banner.", coverFile.getAbsolutePath());
+            }
+
             mailSender.send(message);
             logger.info("Booking confirmation email sent for booking {} to {}", booking.getId(), to);
             return true;
@@ -107,74 +116,68 @@ public class BookingConfirmationEmailService {
                     <meta charset=\"UTF-8\">
                     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
                     <title>Booking Confirmation</title>
+                    <link href=\"https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap\" rel=\"stylesheet\">
                 </head>
-                <body style=\"margin:0;padding:0;background:#f4f6fb;font-family:Segoe UI,Arial,sans-serif;color:#0f172a;\">
+                <body style=\"margin:0;padding:0;background:#f4f6fb;font-family:'Poppins',Segoe UI,Arial,sans-serif;color:#0f172a;\">
                     <table role=\"presentation\" width=\"100%%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f6fb;padding:28px 12px;\">
                         <tr>
                             <td align=\"center\">
-                                <table role=\"presentation\" width=\"620\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:620px;width:100%%;background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;\">
+                                <table role=\"presentation\" width=\"620\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:620px;width:100%%;background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(225,29,72,0.10);\">
                                     <tr>
-                                        <td style=\"padding:18px 24px;background:linear-gradient(140deg,#be123c 0%%,#e11d48 100%%);color:#ffffff;\">
-                                            <h1 style=\"margin:0;font-size:22px;line-height:1.2;font-weight:800;\">Vital Stays</h1>
-                                            <p style=\"margin:8px 0 0;font-size:13px;opacity:0.9;\">Booking Confirmation</p>
+                                        <td style=\"padding:0;\">
+                                            <img src=\"cid:coverImage\" alt=\"Vital Stays\" style=\"width:100%%;height:120px;object-fit:cover;display:block;\">
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style=\"padding:22px 24px 8px;\">
-                                            <p style=\"margin:0 0 10px;font-size:16px;\">Hello %s,</p>
-                                            <p style=\"margin:0 0 14px;font-size:15px;line-height:1.6;color:#334155;\">
-                                                Your booking has been <strong style=\"color:#166534;\">confirmed</strong>. We look forward to hosting you at Vital Stays.
-                                            </p>
+                                        <td style=\"padding:24px 32px 10px 32px;\">
+                                            <h2 style=\"margin:0 0 8px 0;font-size:24px;font-weight:700;color:#e11d48;letter-spacing:0.01em;\">Booking Confirmed!</h2>
+                                            <p style=\"margin:0 0 18px 0;font-size:16px;color:#334155;\">Hello %s,<br>Your booking at <b>Vital Stays</b> is <span style=\"color:#10b981;font-weight:600;\">confirmed</span>. We look forward to hosting you!</p>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style=\"padding:8px 24px 6px;\">
-                                            <table role=\"presentation\" width=\"100%%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;\">
+                                        <td style=\"padding:0 32px 24px 32px;\">
+                                            <table width=\"100%%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;box-shadow:0 2px 8px rgba(0,0,0,0.03);\">
                                                 <tr>
-                                                    <td style=\"padding:14px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#334155;\">
-                                                        <strong style=\"display:block;color:#0f172a;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;\">Booking ID</strong>
-                                                        #%s
+                                                    <td style=\"padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:15px;color:#334155;\">
+                                                        <span style=\"font-size:13px;color:#be123c;font-weight:600;\">Booking ID</span><br>
+                                                        <span style=\"font-size:17px;font-weight:700;letter-spacing:0.02em;\">#%s</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style=\"padding:14px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#334155;\">
-                                                        <strong style=\"display:block;color:#0f172a;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;\">Room</strong>
-                                                        %s (%s)
+                                                    <td style=\"padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:15px;color:#334155;\">
+                                                        <span style=\"font-size:13px;color:#be123c;font-weight:600;\">Room</span><br>
+                                                        <span style=\"font-size:16px;font-weight:600;\">%s</span> <span style=\"font-size:13px;color:#64748b;\">(%s)</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style=\"padding:14px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#334155;\">
-                                                        <strong style=\"display:block;color:#0f172a;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;\">Check-in / Check-out</strong>
-                                                        %s to %s
+                                                    <td style=\"padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:15px;color:#334155;\">
+                                                        <span style=\"font-size:13px;color:#be123c;font-weight:600;\">Check-in / Check-out</span><br>
+                                                        <span style=\"font-size:15px;\">%s</span> <span style=\"color:#64748b;\">to</span> <span style=\"font-size:15px;\">%s</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style=\"padding:14px 16px;border-bottom:1px solid #e2e8f0;font-size:14px;color:#334155;\">
-                                                        <strong style=\"display:block;color:#0f172a;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;\">Total Amount</strong>
-                                                        INR %s
+                                                    <td style=\"padding:16px 20px;border-bottom:1px solid #e2e8f0;font-size:15px;color:#334155;\">
+                                                        <span style=\"font-size:13px;color:#be123c;font-weight:600;\">Total Amount</span><br>
+                                                        <span style=\"font-size:16px;font-weight:700;\">INR %s</span>
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style=\"padding:14px 16px;font-size:14px;color:#334155;\">
-                                                        <strong style=\"display:block;color:#0f172a;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;\">Payment ID</strong>
-                                                        %s
+                                                    <td style=\"padding:16px 20px;font-size:15px;color:#334155;\">
+                                                        <span style=\"font-size:13px;color:#be123c;font-weight:600;\">Payment ID</span><br>
+                                                        <span style=\"font-size:15px;\">%s</span>
                                                     </td>
                                                 </tr>
                                             </table>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style=\"padding:18px 24px 22px;\">
-                                            <p style=\"margin:0;font-size:14px;color:#475569;line-height:1.6;\">
-                                                Thank you for choosing Vital Stays. If you need assistance, simply reply to this email.
-                                            </p>
+                                        <td style=\"padding:0 32px 24px 32px;text-align:center;\">
+                                            <a href=\"mailto:support@vitalstays.com\" style=\"display:inline-block;margin-top:18px;padding:12px 32px;background:#e11d48;color:#fff;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(225,29,72,0.10);transition:background 0.2s;\">Contact Support</a>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td style=\"padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;\">
-                                            <p style=\"margin:0;font-size:12px;color:#64748b;\">
-                                                This is an automated confirmation from Vital Stays.
-                                            </p>
+                                        <td style=\"padding:18px 32px 18px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;\">
+                                            <p style=\"margin:0;font-size:13px;color:#64748b;\">This is an automated confirmation from <b>Vital Stays</b>.<br>Thank you for choosing us!</p>
                                         </td>
                                     </tr>
                                 </table>

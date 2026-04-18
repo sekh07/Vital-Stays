@@ -38,7 +38,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             "     OR LOWER(COALESCE(r.description, '')) LIKE CONCAT('%', LOWER(:location), '%') " +
             "     OR LOWER(r.roomNumber) LIKE CONCAT('%', LOWER(:location), '%')) " +
             "AND NOT EXISTS (" +
-            "    SELECT b.id FROM Booking b WHERE b.room = r AND b.status IN ('CONFIRMED', 'CHECKED_IN') " +
+            "    SELECT b.id FROM Booking b WHERE b.room = r AND b.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN') " +
             "    AND b.checkIn < :checkOut AND b.checkOut > :checkIn)")
         List<Room> findAvailableRoomsBetweenDates(
             @Param("checkIn") LocalDate checkIn,

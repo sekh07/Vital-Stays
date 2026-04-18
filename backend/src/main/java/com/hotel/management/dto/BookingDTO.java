@@ -22,6 +22,9 @@ public class BookingDTO {
 
     private String roomNumber;
 
+    // Full room details for richer booking info
+    private RoomDTO room;
+
     @NotBlank(message = "Customer name is required")
     @Size(max = 255, message = "Customer name must be <= 255 characters")
     private String customerName;

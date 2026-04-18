@@ -3454,6 +3454,12 @@ async function loadMyBookings() {
                     ? 'This reservation has been released.'
                     : 'Reservation remains active.';
 
+            // Extra room details (image, description, amenities) from booking.room
+            const room = booking.room || {};
+            const roomImage = room.image || getRoomImageForCard(room.type || booking.type, room.roomNumber || booking.roomNumber);
+            const roomDescription = room.description || 'Comfortable stay with essential amenities';
+            const amenities = (room.amenities || getAmenitiesForRoomType(room.type || booking.type)).map(label => `<span>${escapeHtml(label)}</span>`).join(' ');
+
             return `
                 <article class="my-booking-card booking-history-row ${isCheckedOutStatus(booking.status) ? 'booking-state-completed' : ''} ${isCancelledStatus(booking.status) ? 'booking-state-cancelled' : ''}">
                     <div class="booking-row-main">
@@ -3462,6 +3468,7 @@ async function loadMyBookings() {
                         </div>
                         <div class="booking-row-cell booking-row-room" data-label="Room">
                             <span class="booking-row-room-title">Room ${rowNumber}</span>
+                            <img src="${escapeHtml(roomImage)}" alt="Room ${rowNumber}" class="booking-room-img" style="width:80px;height:60px;object-fit:cover;border-radius:8px;margin-top:6px;">
                         </div>
                         <div class="booking-row-cell booking-row-type" data-label="Type">
                             <span class="booking-room-type-badge">${roomTypeLabel}</span>
@@ -3483,6 +3490,11 @@ async function loadMyBookings() {
                         <span class="booking-booked-meta text-muted"><i class="fas fa-clock"></i> Booked: ${bookedAt}</span>
                         <span class="text-muted">${escapeHtml(period)}</span>
                         <span class="text-muted ${isCheckedOutStatus(booking.status) ? 'booking-meta-positive' : ''}">${stateText}</span>
+                    </div>
+
+                    <div class="booking-room-extra-details">
+                        <div class="booking-room-desc">${escapeHtml(roomDescription)}</div>
+                        <div class="booking-room-amenities">${amenities}</div>
                     </div>
 
                     ${getVerificationPanel(booking)}
@@ -3731,12 +3743,14 @@ function displayRooms(rooms, checkIn, checkOut, guests) {
         meta.textContent = `${rooms ? rooms.length : 0} room(s) available for ${guests} guest(s) from ${formatDate(checkIn)} to ${formatDate(checkOut)}`;
     }
 
-    if (!rooms || rooms.length === 0) {
+    // Filter out unavailable/booked rooms
+    const availableRooms = (rooms || []).filter(room => room.isAvailable !== false && room.status !== 'BOOKED');
+    if (!availableRooms || availableRooms.length === 0) {
         container.innerHTML = `
             <div class="empty-state-card">
                 <i class="fas fa-bed"></i>
-                <h3>No Rooms Match Your Search</h3>
-                <p>Try different dates or reduce the guest count to find more options.</p>
+                <h3>No Rooms Available</h3>
+                <p>All rooms are booked for your selected dates. Try different dates!</p>
             </div>
         `;
         return;
@@ -3744,7 +3758,7 @@ function displayRooms(rooms, checkIn, checkOut, guests) {
 
     const days = calculateDays(checkIn, checkOut);
 
-    container.innerHTML = rooms.map((room) => {
+    container.innerHTML = availableRooms.map((room) => {
         const total = Number(room.pricePerNight || 0) * days;
         const rawRoomNumber = String(room.roomNumber || 'N/A');
         const rawRoomType = String(room.type || 'STANDARD').toUpperCase();

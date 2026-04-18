@@ -12,6 +12,9 @@ import com.hotel.management.repository.BookingOtpAuditEventRepository;
 import com.hotel.management.repository.BookingRepository;
 import com.hotel.management.repository.CustomerRepository;
 import com.hotel.management.repository.RoomRepository;
+import com.hotel.management.dto.RoomDTO;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,10 @@ public class BookingService {
     @Autowired
     private RoomRepository roomRepository;
 
+        // Needed to convert Room to RoomDTO for BookingDTO.room
+        @Autowired
+        @Lazy
+        private RoomService roomService;
         @Autowired
         private CustomerRepository customerRepository;
 
@@ -371,26 +378,31 @@ public class BookingService {
         throw new IllegalArgumentException("Operation must be CHECKIN or CHECKOUT");
     }
 
-    private BookingDTO mapToDTO(Booking booking) {
-        return BookingDTO.builder()
-                .id(booking.getId())
-                .roomId(booking.getRoom().getId())
-                .roomNumber(booking.getRoom().getRoomNumber())
-                .customerName(booking.getCustomerName())
-                .customerPhone(booking.getCustomerPhone())
-                .customerEmail(booking.getCustomerEmail())
-                .checkIn(booking.getCheckIn())
-                .checkOut(booking.getCheckOut())
-                .totalAmount(booking.getTotalAmount().doubleValue())
-                .status(booking.getStatus())
-                .paymentId(booking.getPaymentId())
-                .paymentStatus(booking.getPaymentStatus())
-                .guestAccessId(booking.getGuestAccessId())
-                .checkInOtp(booking.getCheckInOtp())
-                .checkOutOtp(booking.getCheckOutOtp())
-                .createdAt(booking.getCreatedAt())
-                .build();
-    }
+        private BookingDTO mapToDTO(Booking booking) {
+                RoomDTO roomDTO = null;
+                if (booking.getRoom() != null) {
+                        roomDTO = roomService.mapToDTO(booking.getRoom());
+                }
+                return BookingDTO.builder()
+                                .id(booking.getId())
+                                .roomId(booking.getRoom() != null ? booking.getRoom().getId() : null)
+                                .roomNumber(booking.getRoom() != null ? booking.getRoom().getRoomNumber() : null)
+                                .room(roomDTO)
+                                .customerName(booking.getCustomerName())
+                                .customerPhone(booking.getCustomerPhone())
+                                .customerEmail(booking.getCustomerEmail())
+                                .checkIn(booking.getCheckIn())
+                                .checkOut(booking.getCheckOut())
+                                .totalAmount(booking.getTotalAmount() != null ? booking.getTotalAmount().doubleValue() : null)
+                                .status(booking.getStatus())
+                                .paymentId(booking.getPaymentId())
+                                .paymentStatus(booking.getPaymentStatus())
+                                .guestAccessId(booking.getGuestAccessId())
+                                .checkInOtp(booking.getCheckInOtp())
+                                .checkOutOtp(booking.getCheckOutOtp())
+                                .createdAt(booking.getCreatedAt())
+                                .build();
+        }
 
         private String generateUniqueGuestAccessId() {
                 for (int attempt = 0; attempt < MAX_ACCESS_ID_ATTEMPTS; attempt++) {
