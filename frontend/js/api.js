@@ -119,7 +119,6 @@ async function apiRequest(endpoint, method = 'GET', data = null, token = null, o
 
         return result;
     } catch (error) {
-        console.error('API Error:', error);
         if (error && error.name === 'AbortError') {
             throw error;
         }

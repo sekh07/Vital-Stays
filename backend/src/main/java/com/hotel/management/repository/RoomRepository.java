@@ -24,8 +24,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
         @Query("SELECT r FROM Room r WHERE r.active = true " +
             "AND (:guests IS NULL OR r.capacity >= :guests) " +
-            "AND (:location IS NULL OR :location = '' " +
-            "     OR LOWER(r.type) LIKE CONCAT('%', LOWER(:location), '%') " +
+            "AND (:location IS NULL OR :location = '' OR LOWER(r.location) LIKE CONCAT('%', LOWER(:location), '%') " +
             "     OR LOWER(COALESCE(r.description, '')) LIKE CONCAT('%', LOWER(:location), '%') " +
             "     OR LOWER(r.roomNumber) LIKE CONCAT('%', LOWER(:location), '%'))")
         List<Room> findAvailableRoomsByFilters(
@@ -35,12 +34,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
         @Query("SELECT r FROM Room r WHERE r.active = true " +
             "AND (:guests IS NULL OR r.capacity >= :guests) " +
-            "AND (:location IS NULL OR :location = '' " +
-            "     OR LOWER(r.type) LIKE CONCAT('%', LOWER(:location), '%') " +
+            "AND (:location IS NULL OR :location = '' OR LOWER(r.location) LIKE CONCAT('%', LOWER(:location), '%') " +
             "     OR LOWER(COALESCE(r.description, '')) LIKE CONCAT('%', LOWER(:location), '%') " +
             "     OR LOWER(r.roomNumber) LIKE CONCAT('%', LOWER(:location), '%')) " +
             "AND NOT EXISTS (" +
-            "    SELECT b.id FROM Booking b WHERE b.room = r AND b.status <> 'CANCELLED' " +
+            "    SELECT b.id FROM Booking b WHERE b.room = r AND b.status IN ('CONFIRMED', 'CHECKED_IN') " +
             "    AND b.checkIn < :checkOut AND b.checkOut > :checkIn)")
         List<Room> findAvailableRoomsBetweenDates(
             @Param("checkIn") LocalDate checkIn,

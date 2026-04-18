@@ -3122,15 +3122,6 @@ async function handleUserSignup() {
         return;
     }
 
-    if (password.length < 6) {
-        showAlert('Password must be at least 6 characters', 'danger', {
-            containerId: 'userSignupAlert',
-            replace: true,
-            autoCloseMs: 0
-        });
-        return;
-    }
-
     await withButtonLoading(signupSubmitBtn, async () => {
         try {
             await requestSignupOtp(email);
@@ -4206,7 +4197,7 @@ async function cancelPendingBooking(options = {}) {
         await apiRequest(`/bookings/${currentBooking.id}/cancel`, 'PUT', cancellationPayload, token);
         setBookingCancellationReason(currentBooking.id, cancellationReason);
     } catch (error) {
-        console.warn('Could not cancel pending booking:', error.message);
+        // console.warn('Could not cancel pending booking:', error.message);
     } finally {
         currentBooking = null;
     }

@@ -22,6 +22,9 @@ public class Room {
     @Column(nullable = false)
     private String type; // SINGLE, DOUBLE, SUITE, DELUXE
 
+    @Column(nullable = false, length = 100)
+    private String location;
+
     @Column(nullable = false)
     private BigDecimal pricePerNight;
 

@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    location VARCHAR(100) NOT NULL DEFAULT 'Unknown',
     INDEX idx_room_number (room_number),
     INDEX idx_active (active)
 );
@@ -94,13 +95,13 @@ UPDATE admins
 SET password = '$2a$10$sGV/R3FMOVvP0DAEsRxjNOc/sqCQHFWOvd2LQiBGrcoNFG3B8QJnG'
 WHERE email = 'admin@hotel.com';
 
-INSERT IGNORE INTO rooms (room_number, type, price_per_night, description, capacity, active) VALUES
-('101', 'SINGLE', 2500, 'Comfortable single room with modern amenities', 1, TRUE),
-('102', 'DOUBLE', 4000, 'Spacious double room with city view', 2, TRUE),
-('201', 'SUITE', 6000, 'Luxury suite with living area', 3, TRUE),
-('202', 'DELUXE', 5000, 'Deluxe room with premium features', 2, TRUE),
-('301', 'DOUBLE', 4500, 'Double room with balcony', 2, TRUE),
-('302', 'SUITE', 7000, 'Executive suite with full facilities', 4, TRUE);
+INSERT IGNORE INTO rooms (room_number, type, price_per_night, description, capacity, active, location) VALUES
+('101', 'SINGLE', 2500, 'Comfortable single room with modern amenities', 1, TRUE, 'Unknown'),
+('102', 'DOUBLE', 4000, 'Spacious double room with city view', 2, TRUE, 'Unknown'),
+('201', 'SUITE', 6000, 'Luxury suite with living area', 3, TRUE, 'Unknown'),
+('202', 'DELUXE', 5000, 'Deluxe room with premium features', 2, TRUE, 'Unknown'),
+('301', 'DOUBLE', 4500, 'Double room with balcony', 2, TRUE, 'Unknown'),
+('302', 'SUITE', 7000, 'Executive suite with full facilities', 4, TRUE, 'Unknown');
 
 -- Demo bookings for admin dashboard and analytics
 INSERT INTO bookings (

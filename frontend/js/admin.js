@@ -214,7 +214,7 @@ function checkAuthentication() {
         currentUser = { email: payload.sub };
         document.getElementById('adminName').textContent = payload.sub;
     } catch (e) {
-        console.warn('Could not parse token');
+        // console.warn('Could not parse token');
     }
 
     return true;

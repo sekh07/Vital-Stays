@@ -114,6 +114,16 @@ public class RoomController {
         logger.info("Fetching available rooms for dates: {} to {}, guests: {}, location: {}", checkIn, checkOut, guests, location);
         final long startNs = System.nanoTime();
         try {
+            // Input validation
+            if (checkIn == null || checkOut == null || !checkIn.isBefore(checkOut)) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Invalid dates"));
+            }
+            if (guests != null && guests <= 0) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Guests must be greater than 0"));
+            }
+            if (location != null && location.trim().isEmpty()) {
+                location = null;
+            }
             List<RoomDTO> rooms = roomService.getAvailableRooms(checkIn, checkOut, guests, location);
             final long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
             logger.info("Available rooms query completed in {} ms (count={})", elapsedMs, rooms.size());
@@ -126,7 +136,7 @@ public class RoomController {
             final long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .header("X-Response-Time-Ms", String.valueOf(elapsedMs))
-                    .body(ApiResponse.error("Error fetching rooms"));
+                    .body(ApiResponse.error("Internal server error: " + e.getMessage()));
         }
     }
 }
