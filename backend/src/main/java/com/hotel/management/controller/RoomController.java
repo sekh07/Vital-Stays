@@ -114,7 +114,15 @@ public class RoomController {
         logger.info("Fetching available rooms for dates: {} to {}, guests: {}, location: {}", checkIn, checkOut, guests, location);
         final long startNs = System.nanoTime();
         try {
-            // Input validation
+            // If all params are null, treat as health check and return empty list
+            if (checkIn == null && checkOut == null && guests == null && (location == null || location.trim().isEmpty())) {
+                logger.info("Health check request detected for /rooms/available");
+                return ResponseEntity.ok()
+                        .header("X-Response-Time-Ms", "0")
+                        .header("X-Rooms-Count", "0")
+                        .body(ApiResponse.success("Health check OK", List.of()));
+            }
+            // Input validation for real queries
             if (checkIn == null || checkOut == null || !checkIn.isBefore(checkOut)) {
                 return ResponseEntity.badRequest().body(ApiResponse.error("Invalid dates"));
             }
@@ -138,5 +146,11 @@ public class RoomController {
                     .header("X-Response-Time-Ms", String.valueOf(elapsedMs))
                     .body(ApiResponse.error("Internal server error: " + e.getMessage()));
         }
+    }
+
+    // Dedicated health endpoint for frontend health check (optional, for future use)
+    @GetMapping("/available/health")
+    public ResponseEntity<String> availableRoomsHealth() {
+        return ResponseEntity.ok("OK");
     }
 }

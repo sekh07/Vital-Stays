@@ -800,7 +800,11 @@
                     meta.textContent = `${rooms.length} room${rooms.length !== 1 ? 's' : ''} available for your dates`;
                     
                     if (rooms.length === 0) {
-                        container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1; padding: 2rem;">No rooms available for your selected dates. Try different dates!</p>';
+                        if (normalizedParams.location && normalizedParams.location.toLowerCase() !== 'ranchi') {
+                            container.innerHTML = '<p class="text-warning text-center" style="grid-column: 1/-1; padding: 2rem;">Service not available in your city. Coming soon!</p>';
+                        } else {
+                            container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1; padding: 2rem;">No rooms available for your selected dates. Try different dates!</p>';
+                        }
                     } else {
                         displayRooms(rooms, normalizedParams.checkIn, normalizedParams.checkOut, normalizedParams.guests);
                     }
