@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support & AI Chat - Vital Stays</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20260417-1">
+    <link rel="stylesheet" href="../css/customer.css?v=20260418-28">
+    <link rel="stylesheet" href="../css/page.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button class="mobile-nav-toggle" type="button" aria-label="Open menu" onclick="toggleMobileNav()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="navbar-menu">
+                <a href="../" class="nav-link">Book Room</a>
+                <a id="desktopMyBookingsNavLink" href="../page/bookings.html" class="nav-link">My Bookings</a>
+                <a href="../#popular-stays" class="nav-link">Popular Stays</a>
+                <a href="../#weekend-deals" class="nav-link">Weekend Deals</a>
+            </div>
+            <div class="navbar-actions">
+                <span id="backendHealthBadge" class="backend-health-badge checking" title="Backend connection status">
+                    <span class="health-dot" aria-hidden="true"></span>
+                    <span id="backendHealthLabel">Checking API</span>
+                </span>
+                <button id="userProfileBtn" class="navbar-profile-btn" type="button" style="display: none;" onclick="toggleAccountMenu()" aria-label="Open account menu" aria-expanded="false" aria-controls="accountMenu" aria-haspopup="menu">
+                    <span class="navbar-profile-avatar-shell">
+                        <img id="userProfileAvatar" src="../img/profile-placeholder.svg" alt="Profile">
+                        <span id="userProfileInitials" class="navbar-profile-initials">C</span>
+                    </span>
+                    <span class="navbar-profile-copy">
+                        <span id="userFirstNameNav" class="navbar-profile-name">Guest</span>
+                    </span>
+                    <span class="navbar-profile-caret" aria-hidden="true">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                </button>
+                <div id="accountMenu" class="account-menu" role="menu" aria-hidden="true">
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('profile')">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('bookings')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>My Bookings</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('support')">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Support</span>
+                    </button>
+                    <button type="button" class="account-menu-item account-menu-item-danger" role="menuitem" onclick="handleAccountMenuAction('logout')">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+                <button id="userLogoutBtn" class="btn btn-outline btn-sm" style="display: none;" onclick="requestLogoutConfirmation()">Logout</button>
+                <button id="userLoginBtn" class="btn btn-outline btn-sm" onclick="showUserLoginModal()">Login</button>
+                <button id="userSignupBtn" class="btn btn-primary btn-sm" onclick="showUserSignupModal()">Sign Up</button>
+                <a href="#" class="admin-portal-link" onclick="showAdminLoginModal(); return false;">Admin Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobileNavOverlay" class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+    <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button type="button" class="mobile-nav-close" aria-label="Close menu" onclick="closeMobileNav()">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-links">
+                <a href="../" onclick="closeMobileNav();">Book Room</a>
+                <a href="../page/profile.html" onclick="closeMobileNav(); return false;">Profile</a>
+                <a href="../page/bookings.html" onclick="closeMobileNav(); return false;">My Bookings</a>
+                <a href="../page/support-chat.html" onclick="closeMobileNav(); return false;">Support</a>
+                <a href="../#popular-stays" onclick="closeMobileNav();">Popular Stays</a>
+                <a href="../#weekend-deals" onclick="closeMobileNav();">Weekend Deals</a>
+            </div>
+
+            <div class="mobile-nav-auth">
+                <span id="mobileUserGreeting" class="user-greeting" style="display: none;"></span>
+                <button id="mobileUserLoginBtn" class="btn btn-outline btn-block" onclick="showUserLoginModal(); closeMobileNav();">Login</button>
+                <button id="mobileUserSignupBtn" class="btn btn-primary btn-block" onclick="showUserSignupModal(); closeMobileNav();">Sign Up</button>
+                <button id="mobileUserLogoutBtn" class="btn btn-outline btn-block" style="display: none;" onclick="requestLogoutConfirmation(true)">Logout</button>
+            </div>
+
+            <div class="mobile-nav-account" id="mobileAccountMenuSection"></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb-nav">
+                <a href="../" class="breadcrumb-link"><i class="fas fa-home"></i> Home</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Support & AI Chat</span>
+            </div>
+
+            <section class="support-section">
+                <div class="support-header">
+                    <div>
+                        <h1>Support & Live Chat</h1>
+                        <p class="text-muted">Get instant help from our AI assistant or connect with human support</p>
+                    </div>
+                </div>
+
+                <!-- Support Tabs -->
+                <div class="support-tabs">
+                    <button class="support-tab active" type="button" onclick="switchSupportTab('aiChat', event)">
+                        <i class="fas fa-robot"></i> AI Assistant
+                    </button>
+                    <button class="support-tab" type="button" onclick="switchSupportTab('faq', event)">
+                        <i class="fas fa-question-circle"></i> FAQ
+                    </button>
+                    <button class="support-tab" type="button" onclick="switchSupportTab('contact', event)">
+                        <i class="fas fa-envelope"></i> Contact Us
+                    </button>
+                </div>
+
+                <!-- AI Chat Tab -->
+                <div id="aiChatTab" class="support-tab-content active">
+                    <div class="chat-container">
+                        <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Chat conversation">
+                            <div class="chat-message bot-message">
+                                <div class="chat-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="chat-bubble">
+                                    <p>Hello! 👋 I'm Vital's AI Assistant. How can I help you today?</p>
+                                    <small class="chat-time">Just now</small>
+                                </div>
+                            </div>
+                            <div class="quick-replies">
+                                <button class="quick-reply-btn" onclick="sendQuickReply('How do I book a room?')">How do I book?</button>
+                                <button class="quick-reply-btn" onclick="sendQuickReply('What are the payment methods?')">Payment methods</button>
+                                <button class="quick-reply-btn" onclick="sendQuickReply('How do I cancel my booking?')">Cancel booking</button>
+                                <button class="quick-reply-btn" onclick="sendQuickReply('What about refunds?')">Refund policy</button>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <form id="chatForm" onsubmit="sendChatMessage(event)">
+                                <div class="chat-input-wrapper">
+                                    <input 
+                                        type="text" 
+                                        id="chatInput" 
+                                        class="chat-input" 
+                                        placeholder="Type your message..." 
+                                        autocomplete="off"
+                                        aria-label="Message input"
+                                    >
+                                    <button 
+                                        type="submit" 
+                                        class="chat-send-btn" 
+                                        aria-label="Send message"
+                                        id="chatSendBtn"
+                                    >
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <p class="chat-disclaimer">💡 Responses are powered by our AI system. For urgent issues, please contact support below.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Tab -->
+                <div id="faqTab" class="support-tab-content" style="display: none;">
+                    <div class="faq-container">
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>How do I create an account?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>Visit our website, click "Sign Up", and follow the registration steps. You can sign up with your email or use Google/social login for quick registration.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>What payment methods do you accept?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>We accept credit/debit cards, UPI, net banking, digital wallets, and more through Razorpay. All payments are secure and encrypted.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>Can I cancel or modify my booking?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>Yes! You can cancel up to 24 hours before check-in for a full refund. Modifications are possible through your booking details page.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>What's your cancellation policy?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>Standard cancellation: Full refund if cancelled 24+ hours before check-in. Non-refundable bookings: No refunds possible. Last-minute bookings: Check specific terms at booking.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>How do I reset my password?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>Click "Forgot Password" on the login page, enter your email, and we'll send a reset link. Follow the instructions in the email to set a new password.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <button class="faq-question" type="button" onclick="toggleFAQ(this)">
+                                <span>Are there group or corporate discounts?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer" style="display: none;">
+                                <p>Yes! We offer special rates for group bookings (10+ rooms) and corporate partnerships. Contact our sales team at corporate@vitalstays.com for more details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Tab -->
+                <div id="contactTab" class="support-tab-content" style="display: none;">
+                    <div class="contact-methods">
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h3>Email Support</h3>
+                            <p class="text-muted">Response within 2-4 hours</p>
+                            <a href="mailto:support@vitalstays.com" class="btn btn-primary btn-sm">support@vitalstays.com</a>
+                        </div>
+
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <h3>Phone Support</h3>
+                            <p class="text-muted">Available 9 AM - 9 PM (IST)</p>
+                            <a href="tel:+919876543210" class="btn btn-primary btn-sm">+91 9876 543 210</a>
+                        </div>
+
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3>Live Chat</h3>
+                            <p class="text-muted">Available during business hours</p>
+                            <button class="btn btn-primary btn-sm" onclick="startLiveChatSupport()">Start Chat</button>
+                        </div>
+
+                        <div class="contact-card">
+                            <div class="contact-icon">
+                                <i class="fas fa-brands fa-twitter"></i>
+                            </div>
+                            <h3>Social Media</h3>
+                            <p class="text-muted">Follow @vitalstays on Twitter</p>
+                            <a href="https://twitter.com/vitalstays" target="_blank" class="btn btn-primary btn-sm">@vitalstays</a>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="contact-form-section">
+                        <h3>Send us a Message</h3>
+                        <form id="contactForm" onsubmit="submitContactForm(event)">
+                            <div class="form-group">
+                                <label for="contactName">Full Name</label>
+                                <input type="text" id="contactName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Email Address</label>
+                                <input type="email" id="contactEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactSubject">Subject</label>
+                                <input type="text" id="contactSubject" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactMessage">Message</label>
+                                <textarea id="contactMessage" rows="5" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modals (shared) -->
+    <div id="userLoginModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="userLoginModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('userLoginModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="userLoginModalTitle">Login</h2>
+                <button type="button" class="modal-close" onclick="closeModal('userLoginModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userLoginAlert" class="form-alert-slot"></div>
+            <form id="userLoginForm" class="form-large">
+                <div class="form-group">
+                    <label for="userLoginEmail">Email Address</label>
+                    <input type="email" id="userLoginEmail" placeholder="your@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="userLoginPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="userLoginPassword" placeholder="Enter password" required>
+                        <button type="button" class="password-toggle" data-target="userLoginPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group login-helper-row">
+                    <a href="#" class="forgot-password-link" onclick="showForgotPasswordModal(); return false;">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            <p class="form-help-text">New to Vital Stays? <a href="#" onclick="return switchModal('userLoginModal', 'userSignupModal')">Create an account</a></p>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="googleLoginBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                <div class="google-auth-copy">
+                    <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                    <div>
+                        <h3>Fast secure login</h3>
+                        <p class="text-muted mb-0">Use your Google account for a quicker, safer sign-in.</p>
+                    </div>
+                </div>
+                <div id="googleLoginButton" class="google-signin-slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="forgotPasswordTitle">
+        <div class="modal-backdrop" onclick="closeForgotPasswordModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="forgotPasswordTitle">Reset Password</h2>
+                <button type="button" class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="forgotPasswordAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3">Enter your email to receive a reset OTP, then set a new password.</p>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email Address</label>
+                        <input type="email" id="forgotPasswordEmail" placeholder="Enter your registered email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordOtp">OTP Code</label>
+                        <input type="text" id="forgotPasswordOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordNew">New Password</label>
+                        <input type="password" id="forgotPasswordNew" placeholder="Minimum 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordConfirm">Confirm New Password</label>
+                        <input type="password" id="forgotPasswordConfirm" placeholder="Re-enter new password" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="button" id="forgotSendOtpBtn" class="btn btn-outline btn-block modal-action-btn" onclick="requestForgotPasswordOtp()">Send OTP</button>
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="userSignupModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="userSignupModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('userSignupModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="userSignupModalTitle">Create Account</h2>
+                <button type="button" class="modal-close" onclick="closeModal('userSignupModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userSignupAlert" class="form-alert-slot"></div>
+            <form id="userSignupForm" class="form-large">
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="your@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPhone">Phone Number</label>
+                    <div class="phone-field">
+                        <div class="country-code-shell">
+                            <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="country-code-display">+91</span>
+                                <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                            </button>
+                            <select id="signupCountryCode" class="country-code-select" aria-label="Country code">
+                                <option value="91" selected>+91 India</option>
+                            </select>
+                        </div>
+                        <input type="tel" id="signupPhone" placeholder="Enter phone number" inputmode="numeric" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required>
+                        <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+            </form>
+            <p class="form-help-text">Already have an account? <a href="#" onclick="return switchModal('userSignupModal', 'userLoginModal')">Login</a></p>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="googleSignupBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                <div class="google-auth-copy">
+                    <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                    <div>
+                        <h3>One-tap signup</h3>
+                        <p class="text-muted mb-0">Create your account with Google and skip the extra typing.</p>
+                    </div>
+                </div>
+                <div id="googleSignupButton" class="google-signin-slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup OTP Modal -->
+    <div id="signupOtpModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="signupOtpTitle">
+        <div class="modal-backdrop" onclick="closeSignupOtpModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="signupOtpTitle">Verify Your OTP</h2>
+                <button type="button" class="modal-close" onclick="closeSignupOtpModal()" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="signupOtpAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3" id="signupOtpMessage">Enter the verification code sent to your email.</p>
+                <form id="signupOtpForm">
+                    <div class="form-group">
+                        <label for="signupOtpCode">OTP Code</label>
+                        <input type="text" id="signupOtpCode" placeholder="6-digit code" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Verify OTP</button>
+                        <button type="button" class="btn btn-outline btn-block modal-action-btn" onclick="resendSignupOtp()">Resend OTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="adminLoginModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('adminLoginModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="adminLoginModalTitle">Admin Login</h2>
+                <button type="button" class="modal-close" onclick="closeModal('adminLoginModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="adminLoginAlert" class="form-alert-slot"></div>
+            <form id="adminLoginForm" class="form-large">
+                <div class="form-group">
+                    <label for="adminLoginEmail">Email Address</label>
+                    <input type="email" id="adminLoginEmail" placeholder="Enter admin email" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminLoginPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="adminLoginPassword" placeholder="Enter password" required>
+                        <button type="button" class="password-toggle" data-target="adminLoginPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button id="adminLoginBtn" type="submit" class="btn btn-primary btn-block">Admin Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutConfirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header confirm-modal-header">
+                <div>
+                    <p class="confirm-modal-kicker">Confirm logout</p>
+                    <h2 id="logoutConfirmTitle">Logout</h2>
+                </div>
+                <button type="button" class="modal-close" onclick="closeCustomerConfirmModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="logoutConfirmMessage" class="confirm-modal-message">Do you want to log out from your account?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeCustomerConfirmModal()">Cancel</button>
+                <button id="confirmLogoutBtn" type="button" class="btn btn-danger" onclick="runCustomerConfirmAction()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mega-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js?v=20260417-19"></script>
+    <script src="../js/customer.js?v=20260418-29"></script>
+    <script src="../js/support-chat.js?v=20260418-31"></script>
+</body>
+</html>

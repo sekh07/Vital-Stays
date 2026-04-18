@@ -1,0 +1,45 @@
+# Git Ignore for Hotel Management System
+
+# Backend
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.vscode/
+backend/*.log
+backend/.env
+backend/src/main/resources/application-dev.properties
+backend/src/main/resources/application-prod.properties
+
+# Frontend
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.production
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Credentials
+*.pem
+*.key
+.env
+.env.local
+.env.*.local
+
+# Temporary
+*.tmp
+*.temp
+*.bak

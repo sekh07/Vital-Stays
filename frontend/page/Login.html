@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Vital Stays</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20260417-1">
+    <link rel="stylesheet" href="../css/customer.css?v=20260418-28">
+    <style>
+        body.auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+        }
+        .auth-shell {
+            width: min(1080px, 100%);
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+        .auth-hero, .auth-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+        .auth-hero {
+            padding: 36px;
+            background: linear-gradient(160deg, #fff 0%, #fff7f9 52%, #ffe4e6 100%);
+        }
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #be123c;
+            margin-bottom: 28px;
+        }
+        .auth-brand i {
+            font-size: 1.5rem;
+        }
+        .auth-hero h1 {
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.04;
+            margin-bottom: 16px;
+            color: #0f172a;
+        }
+        .auth-hero p {
+            max-width: 52ch;
+            color: #475569;
+            font-size: 1.02rem;
+        }
+        .auth-points {
+            margin-top: 28px;
+            display: grid;
+            gap: 14px;
+        }
+        .auth-point {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(225, 29, 72, 0.1);
+        }
+        .auth-point i {
+            color: #e11d48;
+            margin-top: 4px;
+        }
+        .auth-card {
+            padding: 0;
+        }
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            background: #fff;
+        }
+        .auth-tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 18px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .auth-tab.active {
+            color: #e11d48;
+            box-shadow: inset 0 -3px 0 #e11d48;
+            background: #fff7f9;
+        }
+        .auth-panel {
+            padding: 28px;
+            display: none;
+        }
+        .auth-panel.active {
+            display: block;
+        }
+        .auth-panel .form-large {
+            margin-top: 16px;
+        }
+        .auth-panel .google-auth-block {
+            margin-top: 20px;
+        }
+        .auth-footer {
+            margin-top: 18px;
+            color: #64748b;
+            text-align: center;
+        }
+        .auth-footer a {
+            color: #e11d48;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        @media (max-width: 960px) {
+            .auth-shell {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            body.auth-page {
+                padding: 12px;
+            }
+            .auth-hero, .auth-panel {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <section class="auth-hero">
+            <div class="auth-brand"><i class="fas fa-hotel"></i> Vital Stays</div>
+            <h1>Sign in or create your account to manage bookings.</h1>
+            <p>Use the official login page for bookings, profile access, and reservation management. You can switch between login and signup here without opening a popup on top of another page.</p>
+            <div class="auth-points">
+                <div class="auth-point"><i class="fas fa-shield-heart"></i><div><strong>Secure access</strong><div class="text-muted">Protected login and signup flow for all customer actions.</div></div></div>
+                <div class="auth-point"><i class="fas fa-calendar-check"></i><div><strong>Booking continuity</strong><div class="text-muted">Return to your booking after login or sign up.</div></div></div>
+                <div class="auth-point"><i class="fas fa-mobile-screen-button"></i><div><strong>Fast on mobile</strong><div class="text-muted">Clean responsive layout that works well on smaller screens.</div></div></div>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <div class="auth-tabs">
+                <button type="button" id="loginTabBtn" class="auth-tab active" onclick="switchAuthPanel('login')">Login</button>
+                <button type="button" id="signupTabBtn" class="auth-tab" onclick="switchAuthPanel('signup')">Sign Up</button>
+            </div>
+
+            <div id="loginPanel" class="auth-panel active">
+                <h2>Login</h2>
+                <p class="text-muted">Enter your email and password to continue.</p>
+                <div id="userLoginAlert" class="form-alert-slot"></div>
+                <form id="userLoginForm" class="form-large">
+                    <div class="form-group">
+                        <label for="userLoginEmail">Email Address</label>
+                        <input type="email" id="userLoginEmail" placeholder="your@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userLoginPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="userLoginPassword" placeholder="Enter password" required>
+                            <button type="button" class="password-toggle" data-target="userLoginPassword" aria-label="Show password" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-group login-helper-row">
+                        <a href="#" class="forgot-password-link" onclick="showForgotPasswordModal(); return false;">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <p class="auth-footer">New to Vital Stays? <a href="#" onclick="switchAuthPanel('signup'); return false;">Create an account</a></p>
+                <div class="auth-divider"><span>or</span></div>
+                <div id="googleLoginBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                    <div class="google-auth-copy">
+                        <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                        <div>
+                            <h3>Fast secure login</h3>
+                            <p class="text-muted mb-0">Use your Google account for a quicker, safer sign-in.</p>
+                        </div>
+                    </div>
+                    <div id="googleLoginButton" class="google-signin-slot"></div>
+                </div>
+            </div>
+
+            <div id="signupPanel" class="auth-panel">
+                <h2>Create Account</h2>
+                <p class="text-muted">Make a new account in a few simple steps.</p>
+                <div id="userSignupAlert" class="form-alert-slot"></div>
+                <form id="userSignupForm" class="form-large">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" placeholder="your@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPhone">Phone Number</label>
+                        <div class="phone-field">
+                            <div class="country-code-shell">
+                                <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="country-code-display">+91</span>
+                                    <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                                </button>
+                                <select id="signupCountryCode" class="country-code-select" aria-label="Country code">
+                                    <option value="91" selected>+91 India</option>
+                                    <option value="1">+1 USA / Canada</option>
+                                    <option value="44">+44 United Kingdom</option>
+                                    <option value="61">+61 Australia</option>
+                                    <option value="971">+971 United Arab Emirates</option>
+                                    <option value="880">+880 Bangladesh</option>
+                                    <option value="94">+94 Sri Lanka</option>
+                                    <option value="977">+977 Nepal</option>
+                                    <option value="49">+49 Germany</option>
+                                    <option value="33">+33 France</option>
+                                    <option value="39">+39 Italy</option>
+                                    <option value="34">+34 Spain</option>
+                                    <option value="31">+31 Netherlands</option>
+                                    <option value="41">+41 Switzerland</option>
+                                    <option value="47">+47 Norway</option>
+                                    <option value="46">+46 Sweden</option>
+                                    <option value="45">+45 Denmark</option>
+                                    <option value="65">+65 Singapore</option>
+                                    <option value="60">+60 Malaysia</option>
+                                    <option value="66">+66 Thailand</option>
+                                    <option value="81">+81 Japan</option>
+                                    <option value="82">+82 South Korea</option>
+                                    <option value="86">+86 China</option>
+                                    <option value="7">+7 Kazakhstan / Russia</option>
+                                </select>
+                                <div class="country-code-dropdown" hidden>
+                                    <input type="text" class="country-code-search" placeholder="Search country or code">
+                                    <div class="country-code-options" role="listbox"></div>
+                                </div>
+                            </div>
+                            <input type="tel" id="signupPhone" placeholder="Enter phone number" inputmode="numeric" autocomplete="tel-national" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required>
+                            <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+                <p class="auth-footer">Already have an account? <a href="#" onclick="switchAuthPanel('login'); return false;">Login</a></p>
+                <div class="auth-divider"><span>or</span></div>
+                <div id="googleSignupBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                    <div class="google-auth-copy">
+                        <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                        <div>
+                            <h3>One-tap signup</h3>
+                            <p class="text-muted mb-0">Create your account with Google and skip the extra typing.</p>
+                        </div>
+                    </div>
+                    <div id="googleSignupButton" class="google-signin-slot"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="forgotPasswordModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="forgotPasswordTitle">
+        <div class="modal-backdrop" onclick="closeForgotPasswordModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="forgotPasswordTitle">Reset Password</h2>
+                <button type="button" class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close dialog"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="forgotPasswordAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3">Enter your email to receive a reset OTP, then set a new password.</p>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email Address</label>
+                        <input type="email" id="forgotPasswordEmail" placeholder="Enter your registered email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordOtp">OTP Code</label>
+                        <input type="text" id="forgotPasswordOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordNew">New Password</label>
+                        <input type="password" id="forgotPasswordNew" placeholder="Minimum 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordConfirm">Confirm New Password</label>
+                        <input type="password" id="forgotPasswordConfirm" placeholder="Re-enter new password" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="button" id="forgotSendOtpBtn" class="btn btn-outline btn-block modal-action-btn" onclick="requestForgotPasswordOtp()">Send OTP</button>
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="signupOtpModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="signupOtpTitle">
+        <div class="modal-backdrop" onclick="closeSignupOtpModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="signupOtpTitle">Verify Your OTP</h2>
+                <button type="button" class="modal-close" onclick="closeSignupOtpModal()" aria-label="Close dialog"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="signupOtpAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3" id="signupOtpMessage">Enter the verification code sent to your email.</p>
+                <form id="signupOtpForm">
+                    <div class="form-group">
+                        <label for="signupOtpCode">OTP Code</label>
+                        <input type="text" id="signupOtpCode" placeholder="6-digit code" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Verify OTP</button>
+                        <button type="button" class="btn btn-outline btn-block modal-action-btn" onclick="resendSignupOtp()">Resend OTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js?v=20260417-19"></script>
+    <script src="../js/customer.js?v=20260418-29"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="if (window.initializeGoogleAuth) { window.initializeGoogleAuth(); }"></script>
+    <script>
+        function switchAuthPanel(panel) {
+            const loginTabBtn = document.getElementById('loginTabBtn');
+            const signupTabBtn = document.getElementById('signupTabBtn');
+            const loginPanel = document.getElementById('loginPanel');
+            const signupPanel = document.getElementById('signupPanel');
+            const showLogin = panel === 'login';
+
+            loginTabBtn.classList.toggle('active', showLogin);
+            signupTabBtn.classList.toggle('active', !showLogin);
+            loginPanel.classList.toggle('active', showLogin);
+            signupPanel.classList.toggle('active', !showLogin);
+        }
+
+        const authMode = new URLSearchParams(window.location.search).get('mode');
+        if (authMode === 'signup') {
+            switchAuthPanel('signup');
+        } else {
+            switchAuthPanel('login');
+        }
+
+        document.body.classList.add('auth-page');
+
+        window.customerPageMode = 'auth';
+    </script>
+</body>
+</html>

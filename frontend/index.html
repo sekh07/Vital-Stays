@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vital - Book a Room</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20260417-1">
+    <link rel="stylesheet" href="css/customer.css?v=20260418-28">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button class="mobile-nav-toggle" type="button" aria-label="Open menu" onclick="toggleMobileNav()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="navbar-menu">
+                <a href="#" class="nav-link active">Book Room</a>
+                <a id="desktopMyBookingsNavLink" href="page/bookings.html" class="nav-link">My Bookings</a>
+                <a href="#popular-stays" class="nav-link">Popular Stays</a>
+                <a href="#weekend-deals" class="nav-link">Weekend Deals</a>
+            </div>
+            <div class="navbar-actions">
+                <span id="backendHealthBadge" class="backend-health-badge checking" title="Backend connection status">
+                    <span class="health-dot" aria-hidden="true"></span>
+                    <span id="backendHealthLabel">Checking API</span>
+                </span>
+                <button id="userProfileBtn" class="navbar-profile-btn" type="button" style="display: none;" onclick="toggleAccountMenu()" aria-label="Open account menu" aria-expanded="false" aria-controls="accountMenu" aria-haspopup="menu">
+                    <span class="navbar-profile-avatar-shell">
+                        <img id="userProfileAvatar" src="img/profile-placeholder.svg" alt="Profile">
+                        <span id="userProfileInitials" class="navbar-profile-initials">C</span>
+                    </span>
+                    <span class="navbar-profile-copy">
+                        <span id="userFirstNameNav" class="navbar-profile-name">Guest</span>
+                    </span>
+                    <span class="navbar-profile-caret" aria-hidden="true">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                </button>
+                <div id="accountMenu" class="account-menu" role="menu" aria-hidden="true">
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('profile')">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('bookings')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>My Bookings</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('support')">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Support</span>
+                    </button>
+                    <button type="button" class="account-menu-item account-menu-item-danger" role="menuitem" onclick="handleAccountMenuAction('logout')">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+                <button id="userLogoutBtn" class="btn btn-outline btn-sm" style="display: none;" onclick="requestLogoutConfirmation()">Logout</button>
+                <button id="userLoginBtn" class="btn btn-outline btn-sm" onclick="showUserLoginModal()">Login</button>
+                <button id="userSignupBtn" class="btn btn-primary btn-sm" onclick="showUserSignupModal()">Sign Up</button>
+                <a href="#" class="admin-portal-link" onclick="showAdminLoginModal()">Admin Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobileNavOverlay" class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+    <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button type="button" class="mobile-nav-close" aria-label="Close menu" onclick="closeMobileNav()">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-links">
+                <a href="#" onclick="closeMobileNav(); return false;">Book Room</a>
+                <a href="page/profile.html" onclick="closeMobileNav();">Profile</a>
+                <a href="page/bookings.html" onclick="closeMobileNav();">My Bookings</a>
+                <a href="page/support-chat.html" onclick="closeMobileNav();">Support</a>
+                <a href="#popular-stays" onclick="closeMobileNav();">Popular Stays</a>
+                <a href="#weekend-deals" onclick="closeMobileNav();">Weekend Deals</a>
+            </div>
+
+            <div class="mobile-nav-auth">
+                <span id="mobileUserGreeting" class="user-greeting" style="display: none;"></span>
+                <button id="mobileUserLoginBtn" class="btn btn-outline btn-block" onclick="showUserLoginModal(); closeMobileNav();">Login</button>
+                <button id="mobileUserSignupBtn" class="btn btn-primary btn-block" onclick="showUserSignupModal(); closeMobileNav();">Sign Up</button>
+                <button id="mobileUserLogoutBtn" class="btn btn-outline btn-block" style="display: none;" onclick="requestLogoutConfirmation(true)">Logout</button>
+            </div>
+
+            <div class="mobile-nav-account" id="mobileAccountMenuSection">
+                <p class="mobile-nav-section-title">My Account</p>
+                <button type="button" class="mobile-account-item" onclick="handleMobileAccountAction('profile')">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </button>
+                <button type="button" class="mobile-account-item" onclick="handleMobileAccountAction('bookings')">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>My Bookings</span>
+                </button>
+                <button type="button" class="mobile-account-item" onclick="handleMobileAccountAction('support')">
+                    <i class="fas fa-life-ring"></i>
+                    <span>Support</span>
+                </button>
+                <button type="button" class="mobile-account-item mobile-account-item-danger" onclick="handleMobileAccountAction('logout')">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+
+            <div class="mobile-nav-admin">
+                <p class="mobile-nav-section-title">Admin Access</p>
+                <a id="mobileAdminPortalLink" href="#" class="btn btn-secondary btn-block mobile-admin-btn" onclick="showAdminLoginModal(); closeMobileNav();">
+                    <i class="fas fa-user-shield"></i> Admin Portal
+                </a>
+            </div>
+
+            <div class="mobile-nav-health">
+                <span id="mobileBackendHealthBadge" class="backend-health-badge checking">
+                    <span class="health-dot" aria-hidden="true"></span>
+                    <span id="mobileBackendHealthLabel">Checking API</span>
+                </span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Alerts Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-pill">Budget to Premium Stays</span>
+            <h1 data-setting-key="hero.title">Book Your Perfect Stay</h1>
+            <p data-setting-key="hero.subtitle">Handpicked rooms, better prices, and fast check-in for every trip.</p>
+            <div class="hero-trust">
+                <span><i class="fas fa-star"></i> 4.5+ guest ratings</span>
+                <span><i class="fas fa-shield-check"></i> Safe stays</span>
+                <span><i class="fas fa-tags"></i> Daily offers</span>
+            </div>
+            <div class="hero-metrics">
+                <article>
+                    <strong data-setting-key="hero.metric.hotels">350+</strong>
+                    <span>City Hotels</span>
+                </article>
+                <article>
+                    <strong data-setting-key="hero.metric.support">24/7</strong>
+                    <span>Support</span>
+                </article>
+                <article>
+                    <strong data-setting-key="hero.metric.happy">1.2M+</strong>
+                    <span>Happy Stays</span>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Booking Form -->
+        <section class="booking-section">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-magnifying-glass-location"></i> Find & Book Your Room
+                </div>
+                <div class="card-body">
+                    <form id="bookingForm" class="booking-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" placeholder="City, area, landmark" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="checkIn">Check-in Date</label>
+                                <input type="date" id="checkIn" required min="">
+                            </div>
+                            <div class="form-group">
+                                <label for="checkOut">Check-out Date</label>
+                                <input type="date" id="checkOut" required min="">
+                            </div>
+                            <div class="form-group">
+                                <label for="guests">Guests</label>
+                                <input type="number" id="guests" min="1" max="4" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-primary btn-block" onclick="searchRooms()">
+                                    <i class="fas fa-search"></i> Search Rooms
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="offer-strip">
+            <div class="offer-card">
+                <i class="fas fa-bolt"></i>
+                <div>
+                    <h4 data-setting-key="offer.1.title">Last Minute Deals</h4>
+                    <p data-setting-key="offer.1.desc">Save up to 35% on tonight stays</p>
+                </div>
+            </div>
+            <div class="offer-card">
+                <i class="fas fa-briefcase"></i>
+                <div>
+                    <h4 data-setting-key="offer.2.title">Business Friendly</h4>
+                    <p data-setting-key="offer.2.desc">Fast Wi-Fi, workspace, easy invoices</p>
+                </div>
+            </div>
+            <div class="offer-card">
+                <i class="fas fa-crown"></i>
+                <div>
+                    <h4 data-setting-key="offer.3.title">Premium Rooms</h4>
+                    <p data-setting-key="offer.3.desc">Handpicked suites with top amenities</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="popular-stays" class="destination-section">
+            <div class="destination-head">
+                <h2>Trending Destinations</h2>
+                <p class="text-muted">Curated places travelers are booking this week.</p>
+            </div>
+            <div class="destination-grid">
+                <article class="destination-card destination-large">
+                    <img src="img/pexels-pixabay-258154.jpg" alt="Goa beach stay">
+                    <div class="destination-overlay">
+                        <h3>Goa Escape</h3>
+                        <p>Beachfront rooms with sunset decks</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <img src="img/pexels-pixabay-265947.jpg" alt="Mountain valley retreat">
+                    <div class="destination-overlay">
+                        <h3>Hill Retreat</h3>
+                        <p>Misty mornings and cozy suites</p>
+                    </div>
+                </article>
+                <article class="destination-card">
+                    <img src="img/room12.jpg" alt="Urban skyline stay">
+                    <div class="destination-overlay">
+                        <h3>City Weekend</h3>
+                        <p>Central stays near top attractions</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="weekend-deals" class="inspiration-section">
+            <div class="inspiration-header">
+                <h2>Travel Moodboard</h2>
+                <p class="text-muted">Visual picks for beach sunsets, mountain mornings, and city nights.</p>
+            </div>
+            <div class="inspiration-grid">
+                <article class="inspiration-card tall-card">
+                    <img src="img/cover.jpg" alt="Sunset seaside getaway">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Weekend Vibes</span>
+                        <h3>Sunset by the Sea</h3>
+                        <p>Late checkout and balcony views near the beach.</p>
+                    </div>
+                </article>
+                <article class="inspiration-card">
+                    <img src="img/room11.jpg" alt="Luxury suite experience">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Signature Stay</span>
+                        <h3>Suite Comfort</h3>
+                        <p>Spacious rooms made for special trips.</p>
+                    </div>
+                </article>
+                <article class="inspiration-card">
+                    <img src="img/pexels-pixabay-265947.jpg" alt="Mountain retreat with valley view">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">Calm Escape</span>
+                        <h3>Hill Morning Retreat</h3>
+                        <p>Fresh air, warm coffee, and a valley sunrise.</p>
+                    </div>
+                </article>
+                <article class="inspiration-card wide-card">
+                    <img src="img/room13.jpg" alt="City skyline lifestyle stay">
+                    <div class="inspiration-overlay">
+                        <span class="inspiration-tag">City Break</span>
+                        <h3>Urban Nights & Rooftop Views</h3>
+                        <p>Stay close to nightlife, business hubs, and local hotspots.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Available Rooms - Hidden on home page, shown on dedicated page -->
+        <section id="availableRoomsSection" class="rooms-section mt-4" style="display: none;">
+            <div class="rooms-section-head">
+                <div>
+                    <h2>Available Rooms</h2>
+                    <p id="roomsResultsMeta" class="text-muted">Enter dates to view available rooms</p>
+                </div>
+            </div>
+            <div id="roomsContainer" class="grid"></div>
+        </section>
+    </div>
+
+    <footer class="mega-footer">
+        <div class="container">
+            <div class="mega-footer-top">
+                <div class="footer-brand-block">
+                    <div class="footer-logo-row">
+                        <i class="fas fa-hotel"></i>
+                        <h3>Vital Stays</h3>
+                    </div>
+                    <p>Easy room booking for business trips, family vacations, and weekend escapes.</p>
+                </div>
+                <div class="footer-network-copy">Trusted stays with transparent pricing and quick support.</div>
+            </div>
+
+            <div class="footer-upper-grid">
+                <div class="footer-app-block">
+                    <p>Download Vital app for exciting offers.</p>
+                    <div class="footer-store-badges">
+                        <a href="#" class="store-badge">
+                            <i class="fab fa-apple" aria-hidden="true"></i>
+                            <span>
+                                <small>Download on</small>
+                                App Store
+                            </span>
+                        </a>
+                        <a href="#" class="store-badge">
+                            <i class="fab fa-google-play" aria-hidden="true"></i>
+                            <span>
+                                <small>Get it on</small>
+                                Google Play
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-upper-links">
+                    <a href="#">About Us</a>
+                    <a href="#">Teams / Careers</a>
+                    <a href="#">Blogs</a>
+                    <a href="#">Support</a>
+                </div>
+
+                <div class="footer-upper-links">
+                    <a href="#">Popular Destinations</a>
+                    <a href="#">Weekend Deals</a>
+                    <a href="#">Business Stays</a>
+                    <a href="#">Premium Rooms</a>
+                </div>
+
+                <div class="footer-upper-links">
+                    <a href="#">Terms and conditions</a>
+                    <a href="#">Guest Policies</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Trust And Safety</a>
+                </div>
+
+                <div class="footer-upper-links">
+                    <a href="#">Contact Us</a>
+                    <a href="#">FAQs</a>
+                    <a href="#">Responsible Disclosure</a>
+                    <a href="#">Partner Support</a>
+                </div>
+            </div>
+
+            <div class="mega-footer-bottom">
+                <div class="footer-socials">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+                <p>2013-2026 Vital Stays Limited</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Your Booking</h2>
+                <button type="button" class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bookingSummary" class="card mb-3">
+                    <div class="card-body">
+                        <div class="flex-between mb-2">
+                            <span><strong>Room:</strong></span>
+                            <span id="summaryRoom"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Check-in:</strong></span>
+                            <span id="summaryCheckIn"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Check-out:</strong></span>
+                            <span id="summaryCheckOut"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Price per Night:</strong></span>
+                            <span id="summaryPrice"></span>
+                        </div>
+                        <div class="flex-between booking-total-row">
+                            <span>Total:</span>
+                            <span id="summaryTotal"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="customerForm" class="form-section">
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email Address *</label>
+                        <input type="email" id="customerEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <div class="phone-field">
+                            <div class="country-code-shell">
+                                <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="country-code-display">+91</span>
+                                    <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                                </button>
+                                <select id="customerCountryCode" class="country-code-select" aria-label="Country code">
+                                    <option value="91" selected>+91 India</option>
+                                    <option value="1">+1 USA / Canada</option>
+                                    <option value="44">+44 United Kingdom</option>
+                                    <option value="61">+61 Australia</option>
+                                    <option value="971">+971 United Arab Emirates</option>
+                                    <option value="880">+880 Bangladesh</option>
+                                    <option value="94">+94 Sri Lanka</option>
+                                    <option value="977">+977 Nepal</option>
+                                    <option value="49">+49 Germany</option>
+                                    <option value="33">+33 France</option>
+                                    <option value="39">+39 Italy</option>
+                                    <option value="34">+34 Spain</option>
+                                    <option value="31">+31 Netherlands</option>
+                                    <option value="41">+41 Switzerland</option>
+                                    <option value="47">+47 Norway</option>
+                                    <option value="46">+46 Sweden</option>
+                                    <option value="45">+45 Denmark</option>
+                                    <option value="65">+65 Singapore</option>
+                                    <option value="60">+60 Malaysia</option>
+                                    <option value="66">+66 Thailand</option>
+                                    <option value="81">+81 Japan</option>
+                                    <option value="82">+82 South Korea</option>
+                                    <option value="86">+86 China</option>
+                                    <option value="7">+7 Kazakhstan / Russia</option>
+                                </select>
+                                <div class="country-code-dropdown" hidden>
+                                    <input type="text" class="country-code-search" placeholder="Search country or code">
+                                    <div class="country-code-options" role="listbox"></div>
+                                </div>
+                            </div>
+                            <input type="tel" id="customerPhone" placeholder="Enter phone number" inputmode="numeric" autocomplete="tel-national" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialRequests">Special Requests</label>
+                        <textarea id="specialRequests" placeholder="Any special requests?" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBookingModal()">Cancel</button>
+                <button type="button" id="proceedPaymentBtn" class="btn btn-primary" onclick="proceedToPayment(event)">
+                    <i class="fas fa-credit-card"></i> Proceed to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Payment</h2>
+                <button type="button" class="modal-close" onclick="closePaymentModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentSummary" class="card mb-3">
+                    <div class="card-body">
+                        <div class="flex-between mb-2">
+                            <span>Amount to Pay:</span>
+                            <span id="paymentAmount" class="payment-amount-value"></span>
+                        </div>
+                        <div class="flex-between">
+                            <span>Payment Mode:</span>
+                            <span id="paymentModeBadge" class="payment-mode-indicator payment-mode-test">Razorpay Test</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3 payment-qr-card">
+                    <h3 class="payment-qr-title">Merchant QR Code</h3>
+                    <img id="merchantQrCode" class="merchant-qr-image" alt="Merchant payment QR code">
+                    <p class="text-muted mb-1" id="merchantQrNote">Scan to pay via UPI</p>
+                    <p class="text-muted payment-qr-note">Payment will be verified after Razorpay or transaction confirmation.</p>
+                </div>
+                
+                <p class="text-muted mb-3">Click the button below to proceed with Razorpay payment</p>
+                <button type="button" id="razorpayBtn" class="btn btn-primary btn-block btn-lg" onclick="processPendingPayment(event)">
+                    <i class="fas fa-lock"></i> Pay with Razorpay (Test Mode)
+                </button>
+                
+                <div class="mt-3 p-3 card payment-test-card">
+                    <p class="text-muted mb-1"><strong>Test Card Details:</strong></p>
+                    <p class="text-muted mb-1">Card: 4111 1111 1111 1111</p>
+                    <p class="text-muted mb-1">Expiry: Any future date</p>
+                    <p class="text-muted">CVV: Any 3 digits</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Login Modal -->
+    <div id="userLoginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login</h2>
+                <button type="button" class="modal-close" onclick="closeUserLoginModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="userLoginAlert" class="form-alert-slot"></div>
+                <form id="userLoginForm">
+                    <div class="form-group">
+                        <label for="userLoginEmail">Email Address</label>
+                        <input type="email" id="userLoginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userLoginPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="userLoginPassword" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" data-target="userLoginPassword" aria-label="Show password" aria-pressed="false">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group login-helper-row">
+                        <a href="#" class="forgot-password-link" onclick="showForgotPasswordModal(); return false;">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <p class="form-help-text">New to Vital Stays? <a href="#" onclick="return switchModal('userLoginModal', 'userSignupModal')">Create an account</a></p>
+                <div class="auth-divider"><span>or</span></div>
+                <div id="googleLoginBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                    <div class="google-auth-copy">
+                        <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                        <div>
+                            <h3>Fast secure login</h3>
+                            <p class="text-muted mb-0">Use your Google account for a quicker, safer sign-in.</p>
+                        </div>
+                    </div>
+                    <div id="googleLoginButton" class="google-signin-slot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button type="button" class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="forgotPasswordAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3">Enter your email to receive a reset OTP, then set a new password.</p>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email Address</label>
+                        <input type="email" id="forgotPasswordEmail" placeholder="Enter your registered email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordOtp">OTP Code</label>
+                        <input type="text" id="forgotPasswordOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordNew">New Password</label>
+                        <input type="password" id="forgotPasswordNew" placeholder="Minimum 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordConfirm">Confirm New Password</label>
+                        <input type="password" id="forgotPasswordConfirm" placeholder="Re-enter new password" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="button" id="forgotSendOtpBtn" class="btn btn-outline btn-block modal-action-btn" onclick="requestForgotPasswordOtp()">Send OTP</button>
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Signup Modal -->
+    <div id="userSignupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Account</h2>
+                <button type="button" class="modal-close" onclick="closeUserSignupModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="userSignupAlert" class="form-alert-slot"></div>
+                <form id="userSignupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" placeholder="Enter full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPhone">Phone Number</label>
+                        <div class="phone-field">
+                            <div class="country-code-shell">
+                                <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="country-code-display">+91</span>
+                                    <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                                </button>
+                                <select id="signupCountryCode" class="country-code-select" aria-label="Country code">
+                                    <option value="91" selected>+91 India</option>
+                                    <option value="1">+1 USA / Canada</option>
+                                    <option value="44">+44 United Kingdom</option>
+                                    <option value="61">+61 Australia</option>
+                                    <option value="971">+971 United Arab Emirates</option>
+                                    <option value="880">+880 Bangladesh</option>
+                                    <option value="94">+94 Sri Lanka</option>
+                                    <option value="977">+977 Nepal</option>
+                                    <option value="49">+49 Germany</option>
+                                    <option value="33">+33 France</option>
+                                    <option value="39">+39 Italy</option>
+                                    <option value="34">+34 Spain</option>
+                                    <option value="31">+31 Netherlands</option>
+                                    <option value="41">+41 Switzerland</option>
+                                    <option value="47">+47 Norway</option>
+                                    <option value="46">+46 Sweden</option>
+                                    <option value="45">+45 Denmark</option>
+                                    <option value="65">+65 Singapore</option>
+                                    <option value="60">+60 Malaysia</option>
+                                    <option value="66">+66 Thailand</option>
+                                    <option value="81">+81 Japan</option>
+                                    <option value="82">+82 South Korea</option>
+                                    <option value="86">+86 China</option>
+                                    <option value="7">+7 Kazakhstan / Russia</option>
+                                </select>
+                                <div class="country-code-dropdown" hidden>
+                                    <input type="text" class="country-code-search" placeholder="Search country or code">
+                                    <div class="country-code-options" role="listbox"></div>
+                                </div>
+                            </div>
+                            <input type="tel" id="signupPhone" placeholder="Enter phone number" inputmode="numeric" autocomplete="tel-national" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <div class="password-field">
+                            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required>
+                            <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password" aria-pressed="false">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+                <p class="form-help-text">Already have an account? <a href="#" onclick="return switchModal('userSignupModal', 'userLoginModal')">Login</a></p>
+                <div class="auth-divider"><span>or</span></div>
+                <div id="googleSignupBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                    <div class="google-auth-copy">
+                        <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                        <div>
+                            <h3>One-tap signup</h3>
+                            <p class="text-muted mb-0">Create your account with Google and skip the extra typing.</p>
+                        </div>
+                    </div>
+                    <div id="googleSignupButton" class="google-signin-slot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Admin Login</h2>
+                <button type="button" class="modal-close" onclick="closeAdminLoginModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminLoginEmail">Email Address</label>
+                        <input type="email" id="adminLoginEmail" placeholder="Enter admin email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminLoginPassword">Password</label>
+                        <input type="password" id="adminLoginPassword" placeholder="Enter password" required>
+                    </div>
+                    <button id="adminLoginBtn" type="submit" class="btn btn-primary btn-block">Admin Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup OTP Modal -->
+    <div id="signupOtpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Verify Your OTP</h2>
+                <button type="button" class="modal-close" onclick="closeSignupOtpModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="signupOtpAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3" id="signupOtpMessage">Enter the verification code sent to your email.</p>
+                <form id="signupOtpForm">
+                    <div class="form-group">
+                        <label for="signupOtpCode">OTP Code</label>
+                        <input type="text" id="signupOtpCode" placeholder="6-digit code" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Verify OTP</button>
+                        <button type="button" class="btn btn-outline btn-block modal-action-btn" onclick="resendSignupOtp()">Resend OTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="profileCropModal" class="modal profile-crop-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Crop Profile Image</h2>
+                <button type="button" class="modal-close" onclick="closeProfileCropModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-2">Drag image to position. Use slider to zoom.</p>
+                <div class="profile-crop-canvas-wrap">
+                    <canvas id="profileCropCanvas" width="320" height="320" aria-label="Profile crop preview"></canvas>
+                </div>
+                <div class="profile-crop-controls">
+                    <label for="profileCropZoom">Zoom</label>
+                    <input id="profileCropZoom" type="range" min="1" max="3" step="0.01" value="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProfileCropModal(true)">Cancel</button>
+                <button id="profileCropApplyBtn" class="btn btn-primary" onclick="applyProfileImageCrop()">Apply Crop</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-check-circle success-modal-icon"></i>
+                <h2>Booking Confirmed!</h2>
+                <p id="successMessage" class="text-muted mb-3"></p>
+                <button class="btn btn-primary" onclick="resetBooking()">Book Another Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutConfirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header confirm-modal-header">
+                <div>
+                    <p class="confirm-modal-kicker">Confirm logout</p>
+                    <h2 id="logoutConfirmTitle">Logout</h2>
+                </div>
+                <button type="button" class="modal-close" onclick="closeCustomerConfirmModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="logoutConfirmMessage" class="confirm-modal-message">Do you want to log out from your account?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeCustomerConfirmModal()">Cancel</button>
+                <button id="confirmLogoutBtn" type="button" class="btn btn-danger" onclick="runCustomerConfirmAction()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay is-hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="js/api.js?v=20260417-19"></script>
+    <script src="js/customer.js?v=20260418-29"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="if (window.initializeGoogleAuth) { window.initializeGoogleAuth(); }"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>

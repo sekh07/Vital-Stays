@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Mountain destination">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dbeafe"/>
+      <stop offset="1" stop-color="#93c5fd"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <polygon points="80,640 380,220 680,640" fill="#334155"/>
+  <polygon points="360,640 700,180 1030,640" fill="#0f172a"/>
+  <polygon points="610,640 880,300 1130,640" fill="#1e293b"/>
+  <polygon points="630,280 700,180 770,280" fill="#f8fafc"/>
+  <rect y="640" width="1200" height="160" fill="#065f46"/>
+  <text x="80" y="120" fill="#1e3a8a" font-size="66" font-family="Poppins, Arial, sans-serif" font-weight="700">Hill Retreat</text>
+</svg>

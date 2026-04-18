@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Vital</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=20260417-1">
+    <link rel="stylesheet" href="css/admin.css?v=20260418-5">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay is-hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-hotel"></i>
+            <h3>Vital Stays</h3>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#dashboard" class="menu-item active" onclick="showDashboard(); return false;" data-menu="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="#rooms" class="menu-item" onclick="showRooms(); return false;" data-menu="rooms">
+                <i class="fas fa-door-open"></i> Rooms
+            </a>
+            <a href="#bookings" class="menu-item" onclick="showBookings(); return false;" data-menu="bookings">
+                <i class="fas fa-calendar-alt"></i> Bookings
+            </a>
+            <a href="#customers" class="menu-item" onclick="showCustomers(); return false;" data-menu="customers">
+                <i class="fas fa-users"></i> Customers
+            </a>
+            <a href="#settings" class="menu-item" onclick="showWebsiteSettings(); return false;" data-menu="settings">
+                <i class="fas fa-sliders"></i> Website
+            </a>
+            <hr class="sidebar-divider">
+            <button class="menu-item menu-item-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+    </aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Top Navigation -->
+    <nav class="topbar">
+        <div class="topbar-left">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 id="pageTitle">Dashboard</h2>
+        </div>
+        <div class="topbar-right">
+            <div class="admin-profile">
+                <span id="adminName">Admin</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alerts -->
+    <div id="alertContainer" class="admin-alert-container"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="content-section active">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-blue">
+                        <i class="fas fa-rupee-sign stat-icon-primary"></i>
+                    </div>
+                    <div>
+                        <p class="stat-label">Total Revenue</p>
+                        <h3 id="totalRevenue">₹0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-green">
+                        <i class="fas fa-calendar-check stat-icon-success"></i>
+                    </div>
+                    <div>
+                        <p class="stat-label">Total Bookings</p>
+                        <h3 id="totalBookings">0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-red">
+                        <i class="fas fa-door-open stat-icon-danger"></i>
+                    </div>
+                    <div>
+                        <p class="stat-label">Occupied Rooms</p>
+                        <h3 id="occupiedRooms">0</h3>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon-amber">
+                        <i class="fas fa-door-open stat-icon-warning"></i>
+                    </div>
+                    <div>
+                        <p class="stat-label">Available Rooms</p>
+                        <h3 id="availableRooms">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid-2 mt-4">
+                <div class="card">
+                    <div class="card-header">Occupancy Rate</div>
+                    <div class="card-body">
+                        <div class="occupancy-circle">
+                            <svg viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" stroke-width="8"></circle>
+                                <circle id="occupancyCircle" cx="60" cy="60" r="50" fill="none" stroke="var(--primary-color)" stroke-width="8" stroke-dasharray="314" stroke-dashoffset="314" transform="rotate(-90 60 60)"></circle>
+                            </svg>
+                            <div class="occupancy-text">
+                                <span id="occupancyRate">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Quick Stats</div>
+                    <div class="card-body">
+                        <div class="stat-item">
+                            <span>Checked-in Today</span>
+                            <strong id="checkedInToday">0</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span>Pending Bookings</span>
+                            <strong id="pendingBookings">0</strong>
+                        </div>
+                        <div class="stat-item">
+                            <span>Confirmed Bookings</span>
+                            <strong id="confirmedBookings">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rooms Section -->
+        <section id="roomsSection" class="content-section">
+            <div class="section-header">
+                <button class="btn btn-primary" onclick="showAddRoomModal()">
+                    <i class="fas fa-plus"></i> Add New Room
+                </button>
+            </div>
+
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Room Number</th>
+                            <th>Type</th>
+                            <th>Price/Night</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roomsTable">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Loading rooms...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Bookings Section -->
+        <section id="bookingsSection" class="content-section">
+            <div class="section-header">
+                <div class="filter-buttons">
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('ALL')" id="filterAll">
+                        All
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('PENDING')" id="filterPending">
+                        Pending
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('CONFIRMED')" id="filterConfirmed">
+                        Confirmed
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('CHECKED_IN')" id="filterCheckedIn">
+                        Checked-in
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('CHECKED_OUT')" id="filterCheckedOut">
+                        Checked-out
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookings('CANCELLED')" id="filterCancelled">
+                        Cancelled
+                    </button>
+                </div>
+            </div>
+
+            <div class="booking-management-stack">
+            <div class="card booking-verify-card">
+                <div class="booking-verify-head">
+                    <h3>Manager OTP Verification</h3>
+                    <p>Ask the guest for their 7-digit Guest ID and OTP to verify before check-in or check-out.</p>
+                </div>
+                <div class="booking-verify-grid">
+                    <div class="form-group">
+                        <label for="bookingOtpOperation">Operation</label>
+                        <select id="bookingOtpOperation">
+                            <option value="CHECKIN">Check In</option>
+                            <option value="CHECKOUT">Check Out</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingGuestId">Guest ID (7 digits)</label>
+                        <input type="text" id="bookingGuestId" inputmode="numeric" maxlength="7" placeholder="e.g. 7654321">
+                    </div>
+                    <div class="form-group">
+                        <label for="bookingGuestOtp">OTP (6 digits)</label>
+                        <input type="text" id="bookingGuestOtp" inputmode="numeric" maxlength="6" placeholder="e.g. 123456">
+                    </div>
+                    <div class="booking-verify-actions">
+                        <button class="btn btn-primary" onclick="verifyBookingForManager()">
+                            <i class="fas fa-shield-alt"></i> Verify & Open Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card booking-audit-card">
+                <div class="booking-audit-head">
+                    <h3>OTP Audit Trail</h3>
+                    <button class="btn btn-outline btn-sm" onclick="loadBookingOtpAuditEvents()">
+                        <i class="fas fa-rotate"></i> Refresh
+                    </button>
+                </div>
+                <div class="booking-audit-table-wrap">
+                    <table class="table booking-audit-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Operation</th>
+                                <th>Manager</th>
+                                <th>Booking</th>
+                                <th>Guest ID</th>
+                                <th>Result</th>
+                                <th>Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingOtpAuditTable">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No audit events yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Room</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable">
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">Loading bookings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="customersSection" class="content-section">
+            <div class="section-header">
+                <h2>Customer Management</h2>
+                <button class="btn btn-outline btn-sm" onclick="loadCustomers()">
+                    <i class="fas fa-rotate"></i> Refresh
+                </button>
+            </div>
+
+            <div class="card">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Verified</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTable">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Loading customers...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="settingsSection" class="content-section">
+            <div class="section-header">
+                <h2>Website Settings</h2>
+            </div>
+
+            <div class="card settings-card">
+                <form id="websiteSettingsForm" class="settings-grid">
+                    <div class="form-group">
+                        <label for="settingBrandName">Brand Name</label>
+                        <input type="text" id="settingBrandName" placeholder="Vital Stays">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingHeroTitle">Hero Title</label>
+                        <input type="text" id="settingHeroTitle" placeholder="Book Your Perfect Stay">
+                    </div>
+                    <div class="form-group settings-grid-full">
+                        <label for="settingHeroSubtitle">Hero Subtitle</label>
+                        <textarea id="settingHeroSubtitle" rows="2" placeholder="Handpicked rooms, better prices..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingMetricHotels">Hero Metric Hotels</label>
+                        <input type="text" id="settingMetricHotels" placeholder="350+">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingMetricSupport">Hero Metric Support</label>
+                        <input type="text" id="settingMetricSupport" placeholder="24/7">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingMetricHappy">Hero Metric Happy</label>
+                        <input type="text" id="settingMetricHappy" placeholder="1.2M+">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer1Title">Offer 1 Title</label>
+                        <input type="text" id="settingOffer1Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer1Desc">Offer 1 Description</label>
+                        <input type="text" id="settingOffer1Desc">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer2Title">Offer 2 Title</label>
+                        <input type="text" id="settingOffer2Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer2Desc">Offer 2 Description</label>
+                        <input type="text" id="settingOffer2Desc">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer3Title">Offer 3 Title</label>
+                        <input type="text" id="settingOffer3Title">
+                    </div>
+                    <div class="form-group">
+                        <label for="settingOffer3Desc">Offer 3 Description</label>
+                        <input type="text" id="settingOffer3Desc">
+                    </div>
+                </form>
+
+                <div class="settings-actions-row">
+                    <button class="btn btn-outline" onclick="loadWebsiteSettingsAdmin()">
+                        <i class="fas fa-rotate"></i> Reload
+                    </button>
+                    <button id="saveWebsiteSettingsBtn" class="btn btn-primary" onclick="saveWebsiteSettings()">
+                        <i class="fas fa-floppy-disk"></i> Save Settings
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add/Edit Room Modal -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="roomModalTitle">Add New Room</h2>
+                <button type="button" class="modal-close" onclick="closeRoomModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="roomForm">
+                    <input type="hidden" id="roomId">
+                    <div class="form-group">
+                        <label for="roomNumber">Room Number *</label>
+                        <input type="text" id="roomNumber" placeholder="e.g., 101" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomType">Room Type *</label>
+                        <select id="roomType" required>
+                            <option value="">Select Type</option>
+                            <option value="SINGLE">Single Room</option>
+                            <option value="DOUBLE">Double Room</option>
+                            <option value="SUITE">Suite</option>
+                            <option value="DELUXE">Deluxe</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomPrice">Price per Night (₹) *</label>
+                        <input type="number" id="roomPrice" step="0.01" placeholder="e.g., 5000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomCapacity">Capacity *</label>
+                        <input type="number" id="roomCapacity" min="1" max="4" placeholder="e.g., 2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomDescription">Description</label>
+                        <textarea id="roomDescription" placeholder="Room description..." rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRoomModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveRoom()">Save Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Booking Details</h2>
+                <button type="button" class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bookingDetails" class="card"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBookingModal()">Close</button>
+                <button id="confirmBookingBtn" class="btn btn-primary booking-action-hidden" onclick="confirmBookingAction()">
+                    <i class="fas fa-check-circle"></i> Confirm Booking
+                </button>
+                <button id="checkInBtn" class="btn btn-info booking-action-hidden" onclick="checkInBooking()">
+                    <i class="fas fa-person-walking-luggage"></i> Check In
+                </button>
+                <button id="checkoutBtn" class="btn btn-success booking-action-hidden" onclick="checkoutBooking()">
+                    <i class="fas fa-sign-out-alt"></i> Checkout Customer
+                </button>
+                <button id="cancelBookingBtn" class="btn btn-danger booking-action-hidden" onclick="cancelBookingAction()">
+                    <i class="fas fa-times"></i> Cancel Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Action Modal -->
+    <div id="confirmActionModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header confirm-modal-header">
+                <div>
+                    <p class="confirm-modal-kicker">Please confirm</p>
+                    <h2 id="confirmActionTitle">Confirm Action</h2>
+                </div>
+                <button type="button" class="modal-close" onclick="closeConfirmActionModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmActionMessage" class="confirm-modal-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeConfirmActionModal()">Cancel</button>
+                <button id="confirmActionBtn" class="btn btn-danger" onclick="runConfirmAction()">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Action Modal -->
+    <div id="inputActionModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header confirm-modal-header">
+                <div>
+                    <p class="confirm-modal-kicker">Required input</p>
+                    <h2 id="inputActionTitle">Enter Details</h2>
+                </div>
+                <button type="button" class="modal-close" onclick="closeInputActionModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="inputActionMessage" class="confirm-modal-message mb-2"></p>
+                <div id="inputActionAlert" class="form-alert-slot"></div>
+                <div class="form-group">
+                    <label id="inputActionLabel" for="inputActionField">Value</label>
+                    <input type="text" id="inputActionField" placeholder="Enter value">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeInputActionModal()">Cancel</button>
+                <button id="inputActionBtn" class="btn btn-primary" onclick="runInputAction()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin.js?v=20260418-13"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</body>
+</html>

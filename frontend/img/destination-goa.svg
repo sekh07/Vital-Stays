@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Goa destination">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="#fef3c7"/>
+  <rect y="260" width="1200" height="540" fill="url(#sea)"/>
+  <circle cx="970" cy="140" r="110" fill="#f97316"/>
+  <path d="M0 310 C180 220, 320 360, 510 300 C700 240, 880 340, 1200 290 L1200 800 L0 800 Z" fill="#fde68a"/>
+  <path d="M120 510 C250 430, 340 560, 500 500 C620 455, 760 560, 920 500" stroke="#ffffff" stroke-width="12" fill="none" opacity="0.7"/>
+  <text x="80" y="110" fill="#7c2d12" font-size="70" font-family="Poppins, Arial, sans-serif" font-weight="700">Goa</text>
+</svg>

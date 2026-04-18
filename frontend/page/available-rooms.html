@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Rooms - Vital Stays</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20260417-1">
+    <link rel="stylesheet" href="../css/customer.css?v=20260418-28">
+    <link rel="stylesheet" href="../css/page.css">
+</head>
+<body>
+    <div id="alertContainer"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button class="mobile-nav-toggle" type="button" aria-label="Open menu" onclick="toggleMobileNav()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="navbar-menu">
+                <a href="../" class="nav-link">Book Room</a>
+                <a id="desktopMyBookingsNavLink" href="bookings.html" class="nav-link">My Bookings</a>
+                <a href="../#popular-stays" class="nav-link">Popular Stays</a>
+                <a href="../#weekend-deals" class="nav-link">Weekend Deals</a>
+            </div>
+            <div class="navbar-actions">
+                <span id="backendHealthBadge" class="backend-health-badge checking" title="Backend connection status">
+                    <span class="health-dot" aria-hidden="true"></span>
+                    <span id="backendHealthLabel">Checking API</span>
+                </span>
+                <button id="userProfileBtn" class="navbar-profile-btn" type="button" style="display: none;" onclick="toggleAccountMenu()" aria-label="Open account menu" aria-expanded="false" aria-controls="accountMenu" aria-haspopup="menu">
+                    <span class="navbar-profile-avatar-shell">
+                        <img id="userProfileAvatar" src="../img/profile-placeholder.svg" alt="Profile">
+                        <span id="userProfileInitials" class="navbar-profile-initials">C</span>
+                    </span>
+                    <span class="navbar-profile-copy">
+                        <span id="userFirstNameNav" class="navbar-profile-name">Guest</span>
+                    </span>
+                    <span class="navbar-profile-caret" aria-hidden="true">
+                        <i class="fas fa-angle-down"></i>
+                    </span>
+                </button>
+                <div id="accountMenu" class="account-menu" role="menu" aria-hidden="true">
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('profile')">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('bookings')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>My Bookings</span>
+                    </button>
+                    <button type="button" class="account-menu-item" role="menuitem" onclick="handleAccountMenuAction('support')">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Support</span>
+                    </button>
+                    <button type="button" class="account-menu-item account-menu-item-danger" role="menuitem" onclick="handleAccountMenuAction('logout')">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+                <button id="userLogoutBtn" class="btn btn-outline btn-sm" style="display: none;" onclick="requestLogoutConfirmation()">Logout</button>
+                <button id="userLoginBtn" class="btn btn-outline btn-sm" onclick="showUserLoginModal()">Login</button>
+                <button id="userSignupBtn" class="btn btn-primary btn-sm" onclick="showUserSignupModal()">Sign Up</button>
+                <a href="#" class="admin-portal-link" onclick="showAdminLoginModal(); return false;">Admin Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobileNavOverlay" class="mobile-nav-overlay" onclick="closeMobileNav()"></div>
+    <aside id="mobileNavDrawer" class="mobile-nav-drawer" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <div class="navbar-brand">
+                <i class="fas fa-hotel"></i>
+                <span data-setting-key="site.brandName">Vital Stays</span>
+            </div>
+            <button type="button" class="mobile-nav-close" aria-label="Close menu" onclick="closeMobileNav()">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-links">
+                <a href="../" onclick="closeMobileNav();">Book Room</a>
+                <a href="profile.html" onclick="closeMobileNav();">Profile</a>
+                <a href="bookings.html" onclick="closeMobileNav();">My Bookings</a>
+                <a href="support-chat.html" onclick="closeMobileNav();">Support</a>
+                <a href="../#popular-stays" onclick="closeMobileNav();">Popular Stays</a>
+                <a href="../#weekend-deals" onclick="closeMobileNav();">Weekend Deals</a>
+            </div>
+
+            <div class="mobile-nav-auth">
+                <span id="mobileUserGreeting" class="user-greeting" style="display: none;"></span>
+                <button id="mobileUserLoginBtn" class="btn btn-outline btn-block" onclick="showUserLoginModal(); closeMobileNav();">Login</button>
+                <button id="mobileUserSignupBtn" class="btn btn-primary btn-block" onclick="showUserSignupModal(); closeMobileNav();">Sign Up</button>
+                <button id="mobileUserLogoutBtn" class="btn btn-outline btn-block" style="display: none;" onclick="requestLogoutConfirmation(true)">Logout</button>
+            </div>
+
+            <div class="mobile-nav-account" id="mobileAccountMenuSection"></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="page-wrapper">
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb-nav">
+                <a href="../" class="breadcrumb-link"><i class="fas fa-home"></i> Home</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Available Rooms</span>
+            </div>
+
+            <!-- Search Filter Bar -->
+            <section class="rooms-search-filter">
+                <div class="search-filter-header">
+                    <h2>Search Rooms Again</h2>
+                </div>
+                <div class="search-filter-form">
+                    <div class="search-filter-group">
+                        <label for="filterLocation">Location</label>
+                        <input type="text" id="filterLocation" placeholder="Enter location" value="">
+                    </div>
+                    <div class="search-filter-group">
+                        <label for="filterCheckIn">Check-in</label>
+                        <input type="date" id="filterCheckIn" value="">
+                    </div>
+                    <div class="search-filter-group">
+                        <label for="filterCheckOut">Check-out</label>
+                        <input type="date" id="filterCheckOut" value="">
+                    </div>
+                    <div class="search-filter-group">
+                        <label for="filterGuests">Guests</label>
+                        <select id="filterGuests">
+                            <option value="1">1 Guest</option>
+                            <option value="2">2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="applyRoomFilter()">
+                        <i class="fas fa-search"></i> Search Again
+                    </button>
+                </div>
+            </section>
+
+            <!-- Available Rooms Section -->
+            <section class="rooms-results-section">
+                <div class="rooms-results-head">
+                    <div>
+                        <h2>Available Rooms</h2>
+                        <p id="roomsResultsMeta" class="text-muted">Select dates and search to view available rooms</p>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="refreshAvailableRooms()" title="Refresh rooms">
+                        <i class="fas fa-redo"></i> Refresh
+                    </button>
+                </div>
+                <div id="roomsContainer" class="grid">
+                    <p class="text-muted text-center" style="grid-column: 1/-1; padding: 2rem;">No rooms selected. Use the search filter above to find available rooms.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modals (shared) -->
+    <div id="userLoginModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="userLoginModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('userLoginModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="userLoginModalTitle">Login</h2>
+                <button type="button" class="modal-close" onclick="closeModal('userLoginModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userLoginAlert" class="form-alert-slot"></div>
+            <form id="userLoginForm" class="form-large">
+                <div class="form-group">
+                    <label for="userLoginEmail">Email Address</label>
+                    <input type="email" id="userLoginEmail" placeholder="your@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="userLoginPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="userLoginPassword" placeholder="Enter password" required>
+                        <button type="button" class="password-toggle" data-target="userLoginPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group login-helper-row">
+                    <a href="#" class="forgot-password-link" onclick="showForgotPasswordModal(); return false;">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            <p class="form-help-text">New to Vital Stays? <a href="#" onclick="return switchModal('userLoginModal', 'userSignupModal')">Create an account</a></p>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="googleLoginBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                <div class="google-auth-copy">
+                    <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                    <div>
+                        <h3>Fast secure login</h3>
+                        <p class="text-muted mb-0">Use your Google account for a quicker, safer sign-in.</p>
+                    </div>
+                </div>
+                <div id="googleLoginButton" class="google-signin-slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="forgotPasswordTitle">
+        <div class="modal-backdrop" onclick="closeForgotPasswordModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="forgotPasswordTitle">Reset Password</h2>
+                <button type="button" class="modal-close" onclick="closeForgotPasswordModal()" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="forgotPasswordAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3">Enter your email to receive a reset OTP, then set a new password.</p>
+                <form id="forgotPasswordForm">
+                    <div class="form-group">
+                        <label for="forgotPasswordEmail">Email Address</label>
+                        <input type="email" id="forgotPasswordEmail" placeholder="Enter your registered email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordOtp">OTP Code</label>
+                        <input type="text" id="forgotPasswordOtp" placeholder="6-digit OTP" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordNew">New Password</label>
+                        <input type="password" id="forgotPasswordNew" placeholder="Minimum 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgotPasswordConfirm">Confirm New Password</label>
+                        <input type="password" id="forgotPasswordConfirm" placeholder="Re-enter new password" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="button" id="forgotSendOtpBtn" class="btn btn-outline btn-block modal-action-btn" onclick="requestForgotPasswordOtp()">Send OTP</button>
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="userSignupModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="userSignupModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('userSignupModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="userSignupModalTitle">Create Account</h2>
+                <button type="button" class="modal-close" onclick="closeModal('userSignupModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userSignupAlert" class="form-alert-slot"></div>
+            <form id="userSignupForm" class="form-large">
+                <div class="form-group">
+                    <label for="signupName">Full Name</label>
+                    <input type="text" id="signupName" placeholder="Your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email Address</label>
+                    <input type="email" id="signupEmail" placeholder="your@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPhone">Phone Number</label>
+                    <div class="phone-field">
+                        <div class="country-code-shell">
+                            <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="country-code-display">+91</span>
+                                <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                            </button>
+                            <select id="signupCountryCode" class="country-code-select" aria-label="Country code">
+                                <option value="91" selected>+91 India</option>
+                            </select>
+                        </div>
+                        <input type="tel" id="signupPhone" placeholder="Enter phone number" inputmode="numeric" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required>
+                        <button type="button" class="password-toggle" data-target="signupPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+            </form>
+            <p class="form-help-text">Already have an account? <a href="#" onclick="return switchModal('userSignupModal', 'userLoginModal')">Login</a></p>
+            <div class="auth-divider"><span>or</span></div>
+            <div id="googleSignupBlock" class="google-auth-block google-auth-panel" style="display: none;">
+                <div class="google-auth-copy">
+                    <div class="google-auth-icon"><i class="fab fa-google"></i></div>
+                    <div>
+                        <h3>One-tap signup</h3>
+                        <p class="text-muted mb-0">Create your account with Google and skip the extra typing.</p>
+                    </div>
+                </div>
+                <div id="googleSignupButton" class="google-signin-slot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup OTP Modal -->
+    <div id="signupOtpModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="signupOtpTitle">
+        <div class="modal-backdrop" onclick="closeSignupOtpModal()"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="signupOtpTitle">Verify Your OTP</h2>
+                <button type="button" class="modal-close" onclick="closeSignupOtpModal()" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="signupOtpAlert" class="form-alert-slot"></div>
+                <p class="text-muted mb-3" id="signupOtpMessage">Enter the verification code sent to your email.</p>
+                <form id="signupOtpForm">
+                    <div class="form-group">
+                        <label for="signupOtpCode">OTP Code</label>
+                        <input type="text" id="signupOtpCode" placeholder="6-digit code" maxlength="6" inputmode="numeric" required>
+                    </div>
+                    <div class="modal-action-row">
+                        <button type="submit" class="btn btn-primary btn-block modal-action-btn">Verify OTP</button>
+                        <button type="button" class="btn btn-outline btn-block modal-action-btn" onclick="resendSignupOtp()">Resend OTP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Your Booking</h2>
+                <button type="button" class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="bookingSummary" class="card mb-3">
+                    <div class="card-body">
+                        <div class="flex-between mb-2">
+                            <span><strong>Room:</strong></span>
+                            <span id="summaryRoom"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Check-in:</strong></span>
+                            <span id="summaryCheckIn"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Check-out:</strong></span>
+                            <span id="summaryCheckOut"></span>
+                        </div>
+                        <div class="flex-between mb-2">
+                            <span><strong>Price per Night:</strong></span>
+                            <span id="summaryPrice"></span>
+                        </div>
+                        <div class="flex-between booking-total-row">
+                            <span>Total:</span>
+                            <span id="summaryTotal"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="customerForm" class="form-section">
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email Address *</label>
+                        <input type="email" id="customerEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <div class="phone-field">
+                            <div class="country-code-shell">
+                                <button type="button" class="country-code-trigger" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="country-code-display">+91</span>
+                                    <i class="fas fa-chevron-down country-code-caret" aria-hidden="true"></i>
+                                </button>
+                                <select id="customerCountryCode" class="country-code-select" aria-label="Country code">
+                                    <option value="91" selected>+91 India</option>
+                                </select>
+                            </div>
+                            <input type="tel" id="customerPhone" placeholder="Enter phone number" inputmode="numeric" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialRequests">Special Requests</label>
+                        <textarea id="specialRequests" placeholder="Any special requests?" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBookingModal()">Cancel</button>
+                <button type="button" id="proceedPaymentBtn" class="btn btn-primary" onclick="proceedToPayment(event)">
+                    <i class="fas fa-credit-card"></i> Proceed to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Payment</h2>
+                <button type="button" class="modal-close" onclick="closePaymentModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="paymentSummary" class="card mb-3">
+                    <div class="card-body">
+                        <div class="flex-between mb-2">
+                            <span>Amount to Pay:</span>
+                            <span id="paymentAmount" class="payment-amount-value"></span>
+                        </div>
+                        <div class="flex-between">
+                            <span>Payment Mode:</span>
+                            <span id="paymentModeBadge" class="payment-mode-indicator payment-mode-test">Razorpay Test</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3 payment-qr-card">
+                    <h3 class="payment-qr-title">Merchant QR Code</h3>
+                    <img id="merchantQrCode" class="merchant-qr-image" alt="Merchant payment QR code">
+                    <p class="text-muted mb-1" id="merchantQrNote">Scan to pay via UPI</p>
+                    <p class="text-muted payment-qr-note">Payment will be verified after Razorpay or transaction confirmation.</p>
+                </div>
+                
+                <p class="text-muted mb-3">Click the button below to proceed with Razorpay payment</p>
+                <button type="button" id="razorpayBtn" class="btn btn-primary btn-block btn-lg" onclick="processPendingPayment(event)">
+                    <i class="fas fa-lock"></i> Pay with Razorpay (Test Mode)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal" role="dialog" aria-hidden="true" aria-labelledby="adminLoginModalTitle">
+        <div class="modal-backdrop" onclick="closeModal('adminLoginModal')"></div>
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="adminLoginModalTitle">Admin Login</h2>
+                <button type="button" class="modal-close" onclick="closeModal('adminLoginModal')" aria-label="Close dialog">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="adminLoginAlert" class="form-alert-slot"></div>
+            <form id="adminLoginForm" class="form-large">
+                <div class="form-group">
+                    <label for="adminLoginEmail">Email Address</label>
+                    <input type="email" id="adminLoginEmail" placeholder="Enter admin email" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminLoginPassword">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="adminLoginPassword" placeholder="Enter password" required>
+                        <button type="button" class="password-toggle" data-target="adminLoginPassword" aria-label="Show password" aria-pressed="false">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button id="adminLoginBtn" type="submit" class="btn btn-primary btn-block">Admin Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutConfirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header confirm-modal-header">
+                <div>
+                    <p class="confirm-modal-kicker">Confirm logout</p>
+                    <h2 id="logoutConfirmTitle">Logout</h2>
+                </div>
+                <button type="button" class="modal-close" onclick="closeCustomerConfirmModal()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="logoutConfirmMessage" class="confirm-modal-message">Do you want to log out from your account?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeCustomerConfirmModal()">Cancel</button>
+                <button id="confirmLogoutBtn" type="button" class="btn btn-danger" onclick="runCustomerConfirmAction()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-check-circle success-modal-icon"></i>
+                <h2>Booking Confirmed!</h2>
+                <p id="successMessage" class="text-muted mb-3"></p>
+                <button class="btn btn-primary" onclick="resetBooking()">Book Another Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay is-hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <footer class="mega-footer"></footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js?v=20260417-19"></script>
+    <script src="../js/customer.js?v=20260418-30"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // Store search params from previous search
+        let lastSearchParams = null;
+        let activeRoomSearchController = null;
+        let lastRoomsRequestKey = '';
+        const ROOM_SEARCH_CACHE_PREFIX = 'available-rooms:';
+        const ROOM_SEARCH_CACHE_TTL_MS = 30000;
+        const PERF_DEBUG_FLAG_KEY = 'hotelPerfDebug';
+        const PERF_HISTORY_LIMIT = 10;
+        let perfDebugPanel = null;
+        const perfTimingHistory = [];
+
+        function isPerfDebugEnabled() {
+            const params = new URLSearchParams(window.location.search);
+            const fromUrl = String(params.get('perfDebug') || '').toLowerCase();
+            if (fromUrl === '1' || fromUrl === 'true') {
+                localStorage.setItem(PERF_DEBUG_FLAG_KEY, 'true');
+                return true;
+            }
+
+            if (fromUrl === '0' || fromUrl === 'false') {
+                localStorage.removeItem(PERF_DEBUG_FLAG_KEY);
+                return false;
+            }
+
+            return String(localStorage.getItem(PERF_DEBUG_FLAG_KEY) || '').toLowerCase() === 'true';
+        }
+
+        function ensurePerfDebugPanel() {
+            if (!isPerfDebugEnabled()) {
+                return null;
+            }
+
+            if (perfDebugPanel && perfDebugPanel.isConnected) {
+                return perfDebugPanel;
+            }
+
+            const host = document.querySelector('.rooms-results-head');
+            if (!host) {
+                return null;
+            }
+
+            const panel = document.createElement('div');
+            panel.id = 'roomsPerfDebugPanel';
+            panel.className = 'card';
+            panel.style.marginTop = '0.75rem';
+            panel.style.padding = '0.55rem 0.75rem';
+            panel.style.fontSize = '0.85rem';
+            panel.style.color = '#475569';
+            panel.style.border = '1px dashed #cbd5e1';
+            panel.style.background = '#f8fafc';
+            panel.textContent = 'Perf debug enabled. Waiting for room search response...';
+
+            host.insertAdjacentElement('afterend', panel);
+            perfDebugPanel = panel;
+            return panel;
+        }
+
+        function updatePerfDebugPanel(message) {
+            const panel = ensurePerfDebugPanel();
+            if (!panel) {
+                return;
+            }
+
+            panel.textContent = message;
+        }
+
+        function addPerfTimingSample(valueMs) {
+            const parsed = Number(valueMs);
+            if (!Number.isFinite(parsed) || parsed < 0) {
+                return;
+            }
+
+            perfTimingHistory.push(parsed);
+            if (perfTimingHistory.length > PERF_HISTORY_LIMIT) {
+                perfTimingHistory.splice(0, perfTimingHistory.length - PERF_HISTORY_LIMIT);
+            }
+        }
+
+        function getPerfTimingSummary() {
+            if (!perfTimingHistory.length) {
+                return 'Last 10: n/a';
+            }
+
+            let min = perfTimingHistory[0];
+            let max = perfTimingHistory[0];
+            let total = 0;
+
+            for (let i = 0; i < perfTimingHistory.length; i += 1) {
+                const value = perfTimingHistory[i];
+                if (value < min) min = value;
+                if (value > max) max = value;
+                total += value;
+            }
+
+            const avg = total / perfTimingHistory.length;
+            return `Last ${perfTimingHistory.length}: min ${min.toFixed(1)} ms | avg ${avg.toFixed(1)} ms | max ${max.toFixed(1)} ms`;
+        }
+
+        function getRoomsCacheKey(params) {
+            const checkIn = String(params?.checkIn || '');
+            const checkOut = String(params?.checkOut || '');
+            const location = String(params?.location || '').toLowerCase();
+            const guests = String(params?.guests || '1');
+            return `${ROOM_SEARCH_CACHE_PREFIX}${checkIn}|${checkOut}|${location}|${guests}`;
+        }
+
+        function getCachedRooms(params) {
+            const key = getRoomsCacheKey(params);
+            const cached = getCachedValue(key, ROOM_SEARCH_CACHE_TTL_MS);
+            if (!cached || !Array.isArray(cached.rooms)) {
+                return null;
+            }
+
+            return {
+                key,
+                rooms: cached.rooms
+            };
+        }
+
+        function cacheRooms(params, rooms) {
+            const key = getRoomsCacheKey(params);
+            setCachedValue(key, {
+                rooms: Array.isArray(rooms) ? rooms : []
+            });
+            return key;
+        }
+
+        function normalizeFilterParams(rawParams) {
+            return {
+                checkIn: String(rawParams?.checkIn || '').trim(),
+                checkOut: String(rawParams?.checkOut || '').trim(),
+                location: String(rawParams?.location || '').trim(),
+                guests: String(rawParams?.guests || '1').trim() || '1'
+            };
+        }
+
+        function loadAvailableRoomsFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            if (!params.has('checkIn') || !params.has('checkOut')) {
+                const savedState = sessionStorage.getItem('hotelRoomSearchState');
+                if (!savedState) {
+                    return;
+                }
+
+                try {
+                    const parsedState = JSON.parse(savedState);
+                    if (!parsedState.checkIn || !parsedState.checkOut) {
+                        return;
+                    }
+
+                    lastSearchParams = {
+                        checkIn: parsedState.checkIn,
+                        checkOut: parsedState.checkOut,
+                        location: parsedState.location || '',
+                        guests: parsedState.guests || 1
+                    };
+                } catch (error) {
+                    return;
+                }
+            } else {
+                lastSearchParams = {
+                    checkIn: params.get('checkIn'),
+                    checkOut: params.get('checkOut'),
+                    location: params.get('location') || '',
+                    guests: params.get('guests') || 1
+                };
+            }
+
+            document.getElementById('filterCheckIn').value = lastSearchParams.checkIn;
+            document.getElementById('filterCheckOut').value = lastSearchParams.checkOut;
+            document.getElementById('filterLocation').value = lastSearchParams.location;
+            document.getElementById('filterGuests').value = lastSearchParams.guests;
+
+            displaySearchResults(lastSearchParams);
+        }
+
+        // Keep only page-specific behavior; shared setup runs from customer.js.
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAvailableRoomsFromUrl();
+            ensurePerfDebugPanel();
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                loadAvailableRoomsFromUrl();
+            }
+        });
+
+        // Apply room filter
+        function applyRoomFilter(options = {}) {
+            const normalizedOptions = options || {};
+            const checkIn = document.getElementById('filterCheckIn').value;
+            const checkOut = document.getElementById('filterCheckOut').value;
+            const location = document.getElementById('filterLocation').value;
+            const guests = document.getElementById('filterGuests').value;
+            
+            if (!checkIn || !checkOut) {
+                if (!normalizedOptions.silent) {
+                    alert('Please select check-in and check-out dates');
+                }
+                return;
+            }
+
+            if (new Date(checkIn) >= new Date(checkOut)) {
+                if (!normalizedOptions.silent) {
+                    alert('Check-out date must be after check-in date');
+                }
+                return;
+            }
+            
+            displaySearchResults({ checkIn, checkOut, location, guests });
+        }
+
+        // Display search results
+        async function displaySearchResults(params) {
+            const container = document.getElementById('roomsContainer');
+            const meta = document.getElementById('roomsResultsMeta');
+            const normalizedParams = normalizeFilterParams(params);
+            const requestKey = getRoomsCacheKey(normalizedParams);
+            const searchBtn = document.querySelector('.rooms-search-filter .btn.btn-primary');
+
+            if (requestKey === lastRoomsRequestKey) {
+                return;
+            }
+
+            lastSearchParams = normalizedParams;
+
+            const cachedResult = getCachedRooms(normalizedParams);
+            if (cachedResult) {
+                lastRoomsRequestKey = cachedResult.key;
+                const cachedRooms = cachedResult.rooms;
+                meta.textContent = `${cachedRooms.length} room${cachedRooms.length !== 1 ? 's' : ''} available for your dates`;
+                if (cachedRooms.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1; padding: 2rem;">No rooms available for your selected dates. Try different dates!</p>';
+                } else {
+                    displayRooms(cachedRooms, normalizedParams.checkIn, normalizedParams.checkOut, normalizedParams.guests);
+                }
+                return;
+            }
+
+            if (activeRoomSearchController) {
+                activeRoomSearchController.abort();
+            }
+
+            activeRoomSearchController = new AbortController();
+
+            container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1;"><i class="fas fa-spinner fa-spin"></i> Searching rooms...</p>';
+            if (searchBtn) {
+                searchBtn.disabled = true;
+            }
+            
+            try {
+                const response = await apiRequest(
+                    `/rooms/available?checkIn=${encodeURIComponent(normalizedParams.checkIn)}&checkOut=${encodeURIComponent(normalizedParams.checkOut)}&guests=${encodeURIComponent(normalizedParams.guests)}&location=${encodeURIComponent(normalizedParams.location)}`,
+                    'GET',
+                    null,
+                    null,
+                    {
+                        useAuth: false,
+                        includeMeta: true,
+                        signal: activeRoomSearchController.signal
+                    }
+                );
+
+                const headers = response && response._meta && response._meta.headers
+                    ? response._meta.headers
+                    : {};
+                const responseTimeMs = headers['x-response-time-ms'];
+                const roomsCountHeader = headers['x-rooms-count'];
+                if (responseTimeMs) {
+                    addPerfTimingSample(responseTimeMs);
+                    updatePerfDebugPanel(`Rooms API ${responseTimeMs} ms | Header count: ${roomsCountHeader || 'n/a'} | ${getPerfTimingSummary()} | Cache key: ${requestKey}`);
+                }
+                
+                if (response.success && Array.isArray(response.data)) {
+                    const rooms = response.data;
+                    cacheRooms(normalizedParams, rooms);
+                    lastRoomsRequestKey = requestKey;
+                    meta.textContent = `${rooms.length} room${rooms.length !== 1 ? 's' : ''} available for your dates`;
+                    
+                    if (rooms.length === 0) {
+                        container.innerHTML = '<p class="text-muted text-center" style="grid-column: 1/-1; padding: 2rem;">No rooms available for your selected dates. Try different dates!</p>';
+                    } else {
+                        displayRooms(rooms, normalizedParams.checkIn, normalizedParams.checkOut, normalizedParams.guests);
+                    }
+                } else {
+                    lastRoomsRequestKey = '';
+                    container.innerHTML = '<p class="text-danger text-center" style="grid-column: 1/-1; padding: 2rem;">Failed to load rooms. Please try again.</p>';
+                }
+            } catch (error) {
+                if (error && error.name === 'AbortError') {
+                    updatePerfDebugPanel(`Rooms API request aborted (superseded by newer search).`);
+                    return;
+                }
+
+                lastRoomsRequestKey = '';
+                console.error('Error fetching rooms:', error);
+                updatePerfDebugPanel(`Rooms API failed: ${String(error && error.message ? error.message : error)}`);
+                container.innerHTML = '<p class="text-danger text-center" style="grid-column: 1/-1; padding: 2rem;">Error loading rooms. Please check your connection.</p>';
+            } finally {
+                if (searchBtn) {
+                    searchBtn.disabled = false;
+                }
+            }
+        }
+
+        // Refresh available rooms
+        function refreshAvailableRooms() {
+            if (lastSearchParams) {
+                lastRoomsRequestKey = '';
+                displaySearchResults(lastSearchParams);
+            }
+        }
+
+        const debouncedFilterSearch = debounce(() => {
+            applyRoomFilter({ silent: true });
+        }, 350);
+
+        ['filterCheckIn', 'filterCheckOut', 'filterGuests', 'filterLocation'].forEach((id) => {
+            const element = document.getElementById(id);
+            if (!element) return;
+
+            const eventName = id === 'filterLocation' ? 'input' : 'change';
+            element.addEventListener(eventName, () => {
+                debouncedFilterSearch();
+            });
+        });
+    </script>
+</body>
+</html>
